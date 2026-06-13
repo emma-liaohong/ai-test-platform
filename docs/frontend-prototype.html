@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI测试平台 - 前端原型预览</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #409EFF;
+  --success: #67C23A;
+  --warning: #E6A23C;
+  --danger: #F56C6C;
+  --info: #909399;
+  --bg: #f5f7fa;
+  --sidebar-bg: #304156;
+  --sidebar-text: #bfcbd9;
+  --sidebar-active: #409EFF;
+  --header-bg: #fff;
+  --card-bg: #fff;
+  --text: #303133;
+  --text-secondary: #909399;
+  --border: #DCDFE6;
+}
+.dark {
+  --bg: #141414;
+  --sidebar-bg: #1d1e1f;
+  --sidebar-text: #a0a4a9;
+  --header-bg: #1d1e1f;
+  --card-bg: #1d1e1f;
+  --text: #e5eaf3;
+  --text-secondary: #a3a6ad;
+  --border: #414243;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+/* Navigation */
+.page-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: #1a1a2e; color: #fff; padding: 12px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.page-nav h2 { font-size: 16px; margin-right: 24px; white-space: nowrap; }
+.page-nav a { color: #a0cfff; text-decoration: none; padding: 4px 12px; border-radius: 4px; font-size: 13px; white-space: nowrap; }
+.page-nav a:hover, .page-nav a.active { background: rgba(64,158,255,0.2); color: #fff; }
+
+/* Layout */
+.layout { display: flex; height: 100vh; padding-top: 52px; }
+.sidebar { width: 220px; background: var(--sidebar-bg); color: var(--sidebar-text); overflow-y: auto; flex-shrink: 0; transition: width 0.3s; }
+.sidebar.collapsed { width: 64px; }
+.sidebar .logo { padding: 16px; font-size: 18px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar .logo span { font-size: 24px; }
+.sidebar .menu-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s; font-size: 14px; }
+.sidebar .menu-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.sidebar .menu-item.active { background: var(--sidebar-active); color: #fff; }
+.sidebar .menu-item .icon { width: 20px; text-align: center; font-size: 16px; }
+.sidebar .menu-group-title { padding: 12px 20px 6px; font-size: 12px; color: rgba(255,255,255,0.3); text-transform: uppercase; }
+
+/* Header */
+.main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.header { height: 56px; background: var(--header-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+.breadcrumb { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 13px; }
+.breadcrumb a { color: var(--text-secondary); text-decoration: none; }
+.breadcrumb a:hover { color: var(--primary); }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.header-right .btn-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; background: none; border: none; color: var(--text-secondary); font-size: 18px; }
+.header-right .btn-icon:hover { background: var(--bg); }
+.badge { position: relative; }
+.badge::after { content: '3'; position: absolute; top: -2px; right: -2px; background: var(--danger); color: #fff; font-size: 10px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
+
+/* Content */
+.content { flex: 1; overflow-y: auto; padding: 20px; }
+.page-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+.page-subtitle { color: var(--text-secondary); margin-bottom: 20px; }
+
+/* Cards */
+.stat-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 20px; }
+.stat-card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border); }
+.stat-card .label { color: var(--text-secondary); font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.stat-card .value { font-size: 28px; font-weight: 700; }
+.stat-card .trend { font-size: 12px; margin-top: 4px; }
+.stat-card .trend.up { color: var(--success); }
+.stat-card .trend.down { color: var(--danger); }
+
+.card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border); margin-bottom: 16px; }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
+th { background: var(--bg); font-weight: 600; color: var(--text-secondary); font-size: 12px; }
+tr:hover { background: rgba(64,158,255,0.04); }
+
+/* Buttons */
+.btn { padding: 8px 16px; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--primary); color: var(--primary); }
+.btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.btn-primary:hover { opacity: 0.85; color: #fff; }
+.btn-success { background: var(--success); color: #fff; border-color: var(--success); }
+.btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-text { border: none; background: none; color: var(--primary); padding: 4px 8px; }
+
+/* Tags */
+.tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px; }
+.tag-pc { background: #ecf5ff; color: #409EFF; }
+.tag-app { background: #f0f9eb; color: #67C23A; }
+.tag-api { background: #fdf6ec; color: #E6A23C; }
+.tag-p0 { background: #fef0f0; color: #F56C6C; }
+.tag-p1 { background: #fdf6ec; color: #E6A23C; }
+.tag-p2 { background: #ecf5ff; color: #409EFF; }
+.tag-success { background: #f0f9eb; color: #67C23A; }
+.tag-fail { background: #fef0f0; color: #F56C6C; }
+.tag-draft { background: #f4f4f5; color: #909399; }
+.tag-running { background: #ecf5ff; color: #409EFF; }
+.dark .tag-pc { background: rgba(64,158,255,0.15); }
+.dark .tag-app { background: rgba(103,194,58,0.15); }
+.dark .tag-api { background: rgba(230,162,60,0.15); }
+.dark .tag-p0 { background: rgba(245,108,108,0.15); }
+.dark .tag-p1 { background: rgba(230,162,60,0.15); }
+.dark .tag-p2 { background: rgba(64,158,255,0.15); }
+.dark .tag-success { background: rgba(103,194,58,0.15); }
+.dark .tag-fail { background: rgba(245,108,108,0.15); }
+.dark .tag-draft { background: rgba(144,147,153,0.15); }
+
+/* Toolbar */
+.toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.search-input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-bg); color: var(--text); width: 240px; font-size: 13px; }
+.select-input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--card-bg); color: var(--text); font-size: 13px; }
+
+/* Health bars */
+.health-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.health-bar { flex: 1; height: 20px; background: var(--bg); border-radius: 10px; overflow: hidden; }
+.health-fill { height: 100%; border-radius: 10px; transition: width 0.6s; }
+.health-label { width: 80px; font-size: 13px; }
+.health-value { width: 40px; text-align: right; font-size: 13px; font-weight: 600; }
+
+/* Chart placeholder */
+.chart-placeholder { height: 200px; background: linear-gradient(135deg, rgba(64,158,255,0.05), rgba(103,194,58,0.05)); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); border: 1px dashed var(--border); }
+
+/* SKILL cards */
+.skill-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.skill-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; transition: all 0.2s; cursor: pointer; }
+.skill-card:hover { border-color: var(--primary); box-shadow: 0 2px 12px rgba(64,158,255,0.1); }
+.skill-card .skill-icon { font-size: 28px; margin-bottom: 8px; }
+.skill-card .skill-name { font-weight: 600; margin-bottom: 4px; }
+.skill-card .skill-type { font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; }
+.skill-card .skill-stats { display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary); }
+.skill-card .skill-stats .stat { display: flex; flex-direction: column; }
+.skill-card .skill-stats .stat-value { font-size: 16px; font-weight: 600; color: var(--text); }
+
+/* Page sections (hide/show) */
+.page-section { display: none; }
+.page-section.active { display: block; }
+
+/* Pagination */
+.pagination { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 16px; }
+.pagination .page-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 13px; background: var(--card-bg); color: var(--text); }
+.pagination .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.pagination .page-info { font-size: 13px; color: var(--text-secondary); margin-right: 8px; }
+
+/* Activity list */
+.activity-item { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.activity-item:last-child { border-bottom: none; }
+
+/* Responsive */
+@media (max-width: 1200px) { .stat-cards { grid-template-columns: repeat(3, 1fr); } .skill-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) { .stat-cards { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } .skill-grid { grid-template-columns: 1fr; } }
+
+/* Step execution with screenshots */
+.step-exec-list { display: flex; flex-direction: column; gap: 12px; }
+.step-exec-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.step-exec-header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.step-exec-header .step-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #fff; flex-shrink: 0; }
+.step-exec-header .step-num.pass { background: var(--success); }
+.step-exec-header .step-num.fail { background: var(--danger); }
+.step-exec-header .step-num.skip { background: var(--info); }
+.step-exec-body { display: flex; gap: 0; }
+.step-screenshots { display: flex; flex: 1; }
+.step-screenshot { flex: 1; padding: 12px; display: flex; flex-direction: column; align-items: center; border-right: 1px solid var(--border); }
+.step-screenshot:last-child { border-right: none; }
+.step-screenshot .label { font-size: 11px; color: var(--text-secondary); margin-bottom:6px; font-weight: 600; }
+.step-screenshot .img-placeholder { width: 100%; max-width: 240px; aspect-ratio: 16/10; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 12px; overflow: hidden; position: relative; }
+.step-screenshot .img-placeholder.diff { border: 2px solid var(--warning); }
+.step-screenshot .img-placeholder .diff-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(230,162,60,0.15); border-radius: 5px; display: flex; align-items: center; justify-content: center; }
+.step-info { width: 240px; flex-shrink: 0; padding: 12px 16px; border-left: 1px solid var(--border); font-size: 13px; }
+.step-info .info-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.step-info .info-label { color: var(--text-secondary); }
+.step-video-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: rgba(139,92,246,0.1); color: #8B5CF6; border-radius: 4px; font-size: 11px; cursor: pointer; }
+.step-video-badge:hover { background: rgba(139,92,246,0.2); }
+
+/* Video player modal */
+.video-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center; }
+.video-modal.show { display: flex; }
+.video-modal-content { background: var(--card-bg); border-radius: 12px; width: 800px; max-width: 90vw; overflow: hidden; }
+.video-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.video-modal-body { aspect-ratio: 16/9; background: #000; display: flex; align-items: center; justify-content: center; color: #fff; flex-direction: column; gap: 12px; }
+.video-modal-body .play-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; }
+.video-modal-body .play-btn:hover { background: rgba(255,255,255,0.3); }
+.video-controls { padding: 12px 20px; display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--border); }
+.video-progress { flex: 1; height: 4px; background: var(--border); border-radius: 2px; position: relative; cursor: pointer; }
+.video-progress-fill { height: 100%; background: var(--primary); border-radius: 2px; width: 35%; }
+.video-time { font-size: 12px; color: var(--text-secondary); }
+
+/* Video library grid */
+.video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.video-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; transition: all 0.2s; }
+.video-card:hover { border-color: var(--primary); box-shadow: 0 2px 12px rgba(64,158,255,0.1); }
+.video-card .thumb { aspect-ratio: 16/10; background: var(--bg); display: flex; align-items: center; justify-content: center; position: relative; }
+.video-card .thumb .play-icon { width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.5); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.video-card .thumb .duration { position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.7); color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 11px; }
+.video-card .info { padding: 10px 12px; }
+.video-card .info .title { font-weight: 600; font-size: 13px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.video-card .info .meta { font-size: 12px; color: var(--text-secondary); display: flex; justify-content: space-between; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 16px; }
+.tab { padding: 10px 20px; cursor: pointer; font-size: 14px; color: var(--text-secondary); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+
+/* Diff slider */
+.diff-slider-container { position: relative; width: 100%; max-width: 240px; aspect-ratio: 16/10; overflow: hidden; border-radius: 6px; border: 2px solid var(--warning); }
+.diff-slider-container .diff-before, .diff-slider-container .diff-after { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+.diff-slider-container .diff-before { background: var(--bg); clip-path: inset(0 50% 0 0); }
+.diff-slider-container .diff-after { background: linear-gradient(135deg, #fef3e2, #fde8cd); }
+.diff-slider-handle { position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; background: var(--warning); cursor: ew-resize; z-index: 2; }
+.diff-slider-handle::after { content: '⟺'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; background: var(--warning); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+
+/* Comparison result badge */
+.compare-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.compare-badge.match { background: rgba(103,194,58,0.1); color: var(--success); }
+.compare-badge.diff { background: rgba(230,162,60,0.1); color: var(--warning); }
+.compare-badge.fail { background: rgba(245,108,108,0.1); color: var(--danger); }
+
+/* Test Report styles */
+.report-header { text-align: center; padding: 24px; background: linear-gradient(135deg, rgba(64,158,255,0.05), rgba(103,194,58,0.05)); border-radius: 12px; margin-bottom: 20px; }
+.report-header h2 { font-size: 22px; margin-bottom: 8px; }
+.report-meta { display: flex; justify-content: center; gap: 24px; color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; }
+.report-score { display: inline-flex; align-items: center; justify-content: center; width: 100px; height: 100px; border-radius: 50%; font-size: 28px; font-weight: 700; margin: 0 auto 12px; }
+.report-score.good { background: rgba(103,194,58,0.1); color: var(--success); border: 3px solid var(--success); }
+.report-score.warn { background: rgba(230,162,60,0.1); color: var(--warning); border: 3px solid var(--warning); }
+.report-score.bad { background: rgba(245,108,108,0.1); color: var(--danger); border: 3px solid var(--danger); }
+.report-summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.report-summary-item { text-align: center; padding: 16px; background: var(--bg); border-radius: 8px; }
+.report-summary-item .num { font-size: 24px; font-weight: 700; }
+.report-summary-item .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+/* Execution log styles */
+.log-viewer { background: #1e1e2e; color: #cdd6f4; border-radius: 8px; font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; font-size: 12px; line-height: 1.7; padding: 16px; max-height: 500px; overflow-y: auto; }
+.log-viewer .log-line { display: flex; gap: 8px; padding: 1px 0; }
+.log-viewer .log-time { color: #6c7086; flex-shrink: 0; }
+.log-viewer .log-level { flex-shrink: 0; width: 50px; font-weight: 600; }
+.log-viewer .log-level.info { color: #89b4fa; }
+.log-viewer .log-level.success { color: #a6e3a1; }
+.log-viewer .log-level.warn { color: #f9e2af; }
+.log-viewer .log-level.error { color: #f38ba8; }
+.log-viewer .log-level.debug { color: #6c7086; }
+.log-viewer .log-msg { flex: 1; word-break: break-all; }
+.log-viewer .log-separator { border-top: 1px dashed #45475a; margin: 8px 0; }
+.log-toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+.log-filter-btn { padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); }
+.log-filter-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+/* Case log accordion */
+.case-log-item { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+.case-log-header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; background: var(--card-bg); transition: background 0.2s; }
+.case-log-header:hover { background: var(--bg); }
+.case-log-header .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.case-log-header .status-dot.pass { background: var(--success); }
+.case-log-header .status-dot.fail { background: var(--danger); }
+.case-log-header .status-dot.skip { background: var(--info); }
+.case-log-body { padding: 0 16px 16px; display: none; }
+.case-log-body.open { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Page Navigation -->
+<div class="page-nav">
+  <h2>🤖 AI测试平台 - UI原型</h2>
+  <a href="#" class="active" onclick="showPage('dashboard')">首页</a>
+  <a href="#" onclick="showPage('cases')">案例管理</a>
+  <a href="#" onclick="showPage('suites')">案例集</a>
+  <a href="#" onclick="showPage('execution')">执行详情</a>
+  <a href="#" onclick="showPage('knowledge')">知识库</a>
+  <a href="#" onclick="showPage('defects')">缺陷库</a>
+  <a href="#" onclick="showPage('skills')">SKILL管理</a>
+  <a href="#" onclick="showPage('chat')">AI对话</a>
+  <a href="#" onclick="showPage('record')">录制</a>
+  <a href="#" onclick="showPage('settings')">系统管理</a>
+  <span style="margin-left:auto">
+    <button class="btn btn-sm" onclick="toggleTheme()" id="themeBtn">🌙 暗色</button>
+  </span>
+</div>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="logo"><span>🤖</span> AI测试平台</div>
+    <div class="menu-item active" onclick="showPage('dashboard')"><span class="icon">📊</span> 首页概览</div>
+    <div class="menu-group-title">测试管理</div>
+    <div class="menu-item" onclick="showPage('cases')"><span class="icon">📋</span> 案例管理</div>
+    <div class="menu-item" onclick="showPage('suites')"><span class="icon">📦</span> 案例集执行</div>
+    <div class="menu-item" onclick="showPage('execution')"><span class="icon">📊</span> 执行详情</div>
+    <div class="menu-group-title">知识与质量</div>
+    <div class="menu-item" onclick="showPage('knowledge')"><span class="icon">📚</span> 知识库</div>
+    <div class="menu-item" onclick="showPage('defects')"><span class="icon">🐛</span> 缺陷库</div>
+    <div class="menu-group-title">AI 能力</div>
+    <div class="menu-item" onclick="showPage('skills')"><span class="icon">🤖</span> SKILL管理</div>
+    <div class="menu-item" onclick="showPage('chat')"><span class="icon">💬</span> AI对话</div>
+    <div class="menu-item" onclick="showPage('record')"><span class="icon">🎬</span> 操作录制</div>
+    <div class="menu-group-title">系统</div>
+    <div class="menu-item" onclick="showPage('settings')"><span class="icon">⚙️</span> 系统管理</div>
+  </div>
+
+  <!-- Main Area -->
+  <div class="main-area">
+    <div class="header">
+      <div class="breadcrumb">
+        <a href="#">首页</a> / <span id="breadcrumb-current">概览</span>
+      </div>
+      <div class="header-right">
+        <input type="text" class="search-input" placeholder="🔍 全局搜索..." style="width:200px">
+        <button class="btn-icon" onclick="toggleTheme()" title="切换主题">🌙</button>
+        <button class="btn-icon badge" title="通知">🔔</button>
+        <div class="avatar" title="管理员">管</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- ============ Dashboard ============ -->
+      <div class="page-section active" id="page-dashboard">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div><div class="page-title">欢迎回来，管理员 👋</div><div class="page-subtitle">今天是 2026年6月12日 星期四</div></div>
+        </div>
+        <div class="stat-cards">
+          <div class="stat-card"><div class="label">📋 测试案例</div><div class="value">1,284</div><div class="trend up">↑ 12% 较上周</div></div>
+          <div class="stat-card"><div class="label">📦 案例集</div><div class="value">56</div><div class="trend up">↑ 8% 较上周</div></div>
+          <div class="stat-card"><div class="label">🐛 缺陷</div><div class="value">23</div><div class="trend down">↓ 5% 较上周</div></div>
+          <div class="stat-card"><div class="label">🤖 SKILL</div><div class="value">42</div><div class="trend up">↑ 15% 较上周</div></div>
+          <div class="stat-card"><div class="label">💬 AI对话</div><div class="value">18次</div><div class="trend">今日使用</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">📊 案例执行趋势 (7天)</div>
+            <div class="chart-placeholder">
+              <div style="text-align:center">
+                <div style="font-size:40px;margin-bottom:8px">📈</div>
+                <div>折线图: 通过/失败/跳过 趋势</div>
+                <div style="display:flex;gap:20px;justify-content:center;margin-top:12px">
+                  <span style="color:var(--success)">● 通过</span>
+                  <span style="color:var(--danger)">● 失败</span>
+                  <span style="color:var(--info)">● 跳过</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">🏆 系统健康度</div>
+            <div class="health-item"><span class="health-label">订单系统</span><div class="health-bar"><div class="health-fill" style="width:85%;background:var(--success)"></div></div><span class="health-value">85%</span></div>
+            <div class="health-item"><span class="health-label">支付系统</span><div class="health-bar"><div class="health-fill" style="width:62%;background:var(--warning)"></div></div><span class="health-value">62%</span></div>
+            <div class="health-item"><span class="health-label">用户系统</span><div class="health-bar"><div class="health-fill" style="width:92%;background:var(--success)"></div></div><span class="health-value">92%</span></div>
+            <div class="health-item"><span class="health-label">库存系统</span><div class="health-bar"><div class="health-fill" style="width:45%;background:var(--danger)"></div></div><span class="health-value">45%</span></div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">🕐 最近执行</div>
+            <div class="activity-item"><span class="tag tag-success">✅</span> 回归测试集 <span style="margin-left:auto;color:var(--text-secondary)">06-12 09:30</span></div>
+            <div class="activity-item"><span class="tag tag-fail">❌</span> 冒烟测试集 <span style="margin-left:auto;color:var(--text-secondary)">06-12 08:00</span></div>
+            <div class="activity-item"><span class="tag tag-success">✅</span> API测试集 <span style="margin-left:auto;color:var(--text-secondary)">06-11 18:00</span></div>
+            <div class="activity-item"><span class="tag tag-running">⏳</span> 全量测试 <span style="margin-left:auto;color:var(--text-secondary)">06-11 02:00</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title">📢 最新动态</div>
+            <div class="activity-item">🤖 AI 自动生成了 <b>15</b> 条新案例</div>
+            <div class="activity-item">🐛 发现 <b>3</b> 个新缺陷</div>
+            <div class="activity-item">🎯 SKILL-012 自学习成功</div>
+            <div class="activity-item">📄 需求文档 v2.3 已解析完成</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ Case Management ============ -->
+      <div class="page-section" id="page-cases">
+        <div class="page-title">案例管理</div>
+        <div class="page-subtitle">管理 PC端 / APP端 / API接口 测试案例</div>
+        <div class="toolbar">
+          <input class="search-input" placeholder="🔍 搜索案例名称/编码">
+          <select class="select-input"><option>所属系统</option><option>订单系统</option><option>支付系统</option><option>用户系统</option></select>
+          <select class="select-input"><option>案例类型</option><option>🖥 PC端</option><option>📱 APP端</option><option>🔌 API接口</option></select>
+          <select class="select-input"><option>优先级</option><option>P0</option><option>P1</option><option>P2</option><option>P3</option></select>
+          <select class="select-input"><option>状态</option><option>草稿</option><option>就绪</option><option>已归档</option></select>
+          <button class="btn btn-primary btn-sm">🔍 搜索</button>
+          <button class="btn btn-sm">↻ 重置</button>
+          <span style="flex:1"></span>
+          <button class="btn btn-primary">+ 新建案例</button>
+          <button class="btn">↓ 导入</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table>
+            <thead>
+              <tr><th style="width:30px"><input type="checkbox"></th><th>案例编码</th><th>案例名称</th><th>类型</th><th>所属系统</th><th>优先级</th><th>状态</th><th>创建时间</th><th>操作</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><input type="checkbox"></td><td>TC-001</td><td>用户登录-正常流程</td><td><span class="tag tag-pc">🖥 PC</span></td><td>订单系统</td><td><span class="tag tag-p0">P0</span></td><td><span class="tag tag-success">就绪</span></td><td>2026-06-10</td><td><button class="btn btn-sm btn-success">▶ 执行</button> <button class="btn-text">⋮</button></td></tr>
+              <tr><td><input type="checkbox"></td><td>TC-002</td><td>下单-支付宝支付</td><td><span class="tag tag-pc">🖥 PC</span></td><td>支付系统</td><td><span class="tag tag-p0">P0</span></td><td><span class="tag tag-success">就绪</span></td><td>2026-06-10</td><td><button class="btn btn-sm btn-success">▶ 执行</button> <button class="btn-text">⋮</button></td></tr>
+              <tr><td><input type="checkbox"></td><td>TC-003</td><td>获取用户信息接口</td><td><span class="tag tag-api">🔌 API</span></td><td>用户系统</td><td><span class="tag tag-p1">P1</span></td><td><span class="tag tag-draft">草稿</span></td><td>2026-06-11</td><td><button class="btn btn-sm btn-success">▶ 执行</button> <button class="btn-text">⋮</button></td></tr>
+              <tr><td><input type="checkbox"></td><td>TC-004</td><td>APP首页加载测试</td><td><span class="tag tag-app">📱 APP</span></td><td>订单系统</td><td><span class="tag tag-p1">P1</span></td><td><span class="tag tag-success">就绪</span></td><td>2026-06-11</td><td><button class="btn btn-sm btn-success">▶ 执行</button> <button class="btn-text">⋮</button></td></tr>
+              <tr><td><input type="checkbox"></td><td>TC-005</td><td>搜索-空结果场景</td><td><span class="tag tag-pc">🖥 PC</span></td><td>订单系统</td><td><span class="tag tag-p2">P2</span></td><td><span class="tag tag-draft">草稿</span></td><td>2026-06-12</td><td><button class="btn btn-sm btn-success">▶ 执行</button> <button class="btn-text">⋮</button></td></tr>
+              <tr><td><input type="checkbox"></td><td>TC-006</td><td>订单列表分页查询</td><td><span class="tag tag-api">🔌 API</span></td><td>订单系统</td><td><span class="tag tag-p1">P1</span></td><td><span class="tag tag-success">就绪</span></td><td>2026-06-12</td><td><button class="btn btn-sm btn-success">▶ 执行</button> <button class="btn-text">⋮</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+          <span style="font-size:13px;color:var(--text-secondary)">已选 0 项 &nbsp; <button class="btn-text" style="color:var(--danger)">批量删除</button></span>
+          <div class="pagination">
+            <span class="page-info">共 1,284 条</span>
+            <span class="page-btn">‹</span>
+            <span class="page-btn active">1</span>
+            <span class="page-btn">2</span>
+            <span class="page-btn">3</span>
+            <span class="page-btn">...</span>
+            <span class="page-btn">65</span>
+            <span class="page-btn">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ Suites ============ -->
+      <div class="page-section" id="page-suites">
+        <div class="page-title">案例集执行</div>
+        <div class="page-subtitle">管理测试套件和执行计划</div>
+        <div class="toolbar">
+          <input class="search-input" placeholder="🔍 搜索案例集">
+          <span style="flex:1"></span>
+          <button class="btn btn-primary">+ 新建案例集</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table>
+            <thead><tr><th>案例集名称</th><th>所属系统</th><th>类型</th><th>案例数</th><th>最近执行</th><th>通过率</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr><td><b>📦 回归测试集</b></td><td>订单系统</td><td><span class="tag tag-pc">回归</span></td><td>35</td><td>06-12 09:30</td><td><span style="color:var(--success)">94%</span></td><td><span class="tag tag-success">✅ 通过</span></td><td><button class="btn btn-sm btn-success">▶ 执行</button> <button class="btn-text">📊</button></td></tr>
+              <tr><td><b>📦 冒烟测试集</b></td><td>订单系统</td><td><span class="tag tag-pc">冒烟</span></td><td>12</td><td>06-12 08:00</td><td><span style="color:var(--danger)">78%</span></td><td><span class="tag tag-fail">❌ 失败</span></td><td><button class="btn btn-sm btn-success">▶ 执行</button> <button class="btn-text">📊</button></td></tr>
+              <tr><td><b>📦 API全量测试</b></td><td>支付系统</td><td><span class="tag tag-api">手动</span></td><td>48</td><td>06-11 18:00</td><td><span style="color:var(--success)">100%</span></td><td><span class="tag tag-success">✅ 通过</span></td><td><button class="btn btn-sm btn-success">▶ 执行</button> <button class="btn-text">📊</button></td></tr>
+              <tr><td><b>📦 核心链路测试</b></td><td>全平台</td><td><span class="tag" style="background:#f0e6ff;color:#8B5CF6">智能</span></td><td>80</td><td>06-11 02:00</td><td><span style="color:var(--success)">97%</span></td><td><span class="tag tag-running">⏳ 执行中</span></td><td><button class="btn btn-sm" disabled>执行中</button> <button class="btn-text">📊</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="grid-2" style="margin-top:16px">
+          <div class="card">
+            <div class="card-title">📊 执行历史</div>
+            <table>
+              <thead><tr><th>执行ID</th><th>案例集</th><th>时间</th><th>触发</th><th>状态</th><th>通过率</th></tr></thead>
+              <tbody>
+                <tr><td>EX-1024</td><td>回归测试集</td><td>06-12 09:30</td><td>手动</td><td><span class="tag tag-success">✅</span></td><td>33/35</td></tr>
+                <tr><td>EX-1023</td><td>冒烟测试集</td><td>06-12 08:00</td><td>定时</td><td><span class="tag tag-fail">❌</span></td><td>28/35</td></tr>
+                <tr><td>EX-1022</td><td>API全量测试</td><td>06-11 18:00</td><td>手动</td><td><span class="tag tag-success">✅</span></td><td>35/35</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-title">📈 执行统计</div>
+            <div class="chart-placeholder">
+              <div style="text-align:center">
+                <div style="font-size:40px;margin-bottom:8px">📊</div>
+                <div>本周执行: 128 次</div>
+                <div style="margin-top:8px">
+                  <span style="color:var(--success)">✅ 通过率 91%</span> &nbsp;
+                  <span style="color:var(--danger)">❌ 失败率 6%</span> &nbsp;
+                  <span style="color:var(--info)">⏭ 跳过 3%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ Knowledge ============ -->
+      <div class="page-section" id="page-knowledge">
+        <div class="page-title">知识库管理</div>
+        <div class="page-subtitle">管理案例库、需求文档、设计文档、代码库、案例视频等知识资产</div>
+        <div class="tabs">
+          <div class="tab active" onclick="switchKbTab(this, 'kb-docs')">📄 文档库</div>
+          <div class="tab" onclick="switchKbTab(this, 'kb-videos')">🎬 案例视频库</div>
+          <div class="tab" onclick="switchKbTab(this, 'kb-search')">🤖 智能检索</div>
+        </div>
+
+        <!-- Tab: 文档库 -->
+        <div id="kb-docs">
+        <div style="display:flex;gap:16px;height:calc(100vh - 260px)">
+          <div class="card" style="width:260px;flex-shrink:0;overflow-y:auto">
+            <div class="card-title">📂 分类</div>
+            <div style="font-size:13px">
+              <div style="padding:6px 0;cursor:pointer">▼ 📋 案例库</div>
+              <div style="padding:4px 0 4px 16px;cursor:pointer">▼ 订单系统</div>
+              <div style="padding:4px 0 4px 32px;cursor:pointer;color:var(--primary)">● 登录模块 <span style="color:var(--text-secondary)">(12)</span></div>
+              <div style="padding:4px 0 4px 32px;cursor:pointer">● 支付模块 <span style="color:var(--text-secondary)">(8)</span></div>
+              <div style="padding:4px 0 4px 16px;cursor:pointer">▶ 支付系统</div>
+              <div style="padding:6px 0;cursor:pointer">▶ 📋 需求文档库</div>
+              <div style="padding:6px 0;cursor:pointer">▶ 📋 开发设计文档</div>
+              <div style="padding:6px 0;cursor:pointer">▶ 📋 GIT代码库</div>
+              <div style="padding:6px 0;cursor:pointer">▶ 📋 缺陷库</div>
+              <div style="padding:6px 0;cursor:pointer">▶ 📋 数据库表清单</div>
+            </div>
+          </div>
+          <div style="flex:1">
+            <div class="toolbar">
+              <input class="search-input" placeholder="🔍 搜索文档" style="flex:1;max-width:400px">
+              <button class="btn btn-primary">↑ 上传文档</button>
+            </div>
+            <div class="card" style="padding:0;overflow:hidden">
+              <table>
+                <thead><tr><th>文档名称</th><th>类型</th><th>大小</th><th>解析状态</th><th>更新时间</th><th>操作</th></tr></thead>
+                <tbody>
+                  <tr><td>📄 需求文档v2.3.pdf</td><td>PDF</td><td>2.3MB</td><td><span class="tag tag-success">✅ 已解析</span></td><td>06-12</td><td><button class="btn-text">👁 预览</button> <button class="btn-text">⋮</button></td></tr>
+                  <tr><td>📘 接口设计文档.docx</td><td>Word</td><td>1.1MB</td><td><span class="tag tag-success">✅ 已解析</span></td><td>06-11</td><td><button class="btn-text">👁 预览</button> <button class="btn-text">⋮</button></td></tr>
+                  <tr><td>📊 数据库设计.xlsx</td><td>Excel</td><td>56KB</td><td><span class="tag tag-success">✅ 已解析</span></td><td>06-10</td><td><button class="btn-text">👁 预览</button> <button class="btn-text">⋮</button></td></tr>
+                  <tr><td>🖼 系统架构图.png</td><td>Image</td><td>890KB</td><td><span class="tag tag-success">✅ 已解析</span></td><td>06-09</td><td><button class="btn-text">👁 预览</button> <button class="btn-text">⋮</button></td></tr>
+                  <tr><td>🖼 流程图-下单.png</td><td>Image</td><td>450KB</td><td><span class="tag tag-running">🔄 解析中</span></td><td>06-12</td><td><button class="btn-text" disabled>等待中</button></td></tr>
+                  <tr><td>📝 测试规范.md</td><td>Markdown</td><td>12KB</td><td><span class="tag tag-success">✅ 已解析</span></td><td>06-08</td><td><button class="btn-text">👁 预览</button> <button class="btn-text">⋮</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        <!-- Tab: 案例视频库 -->
+        <div id="kb-videos" style="display:none">
+          <div class="toolbar">
+            <input class="search-input" placeholder="🔍 搜索视频">
+            <select class="select-input"><option>所属系统</option><option>订单系统</option><option>支付系统</option><option>用户系统</option></select>
+            <select class="select-input"><option>来源类型</option><option>📝 录制生成</option><option>▶ 执行录制</option></select>
+            <select class="select-input"><option>时间范围</option><option>今天</option><option>近7天</option><option>近30天</option></select>
+            <span style="flex:1"></span>
+            <span style="font-size:13px;color:var(--text-secondary)">共 86 个视频 · 总大小 2.3GB</span>
+          </div>
+          <div class="video-grid">
+            <div class="video-card" onclick="openVideoModal('用户登录-正常流程 (录制)', '00:12')">
+              <div class="thumb" style="background:linear-gradient(135deg,#e8f4fd,#d1ecf9)">
+                <div class="play-icon">▶</div>
+                <div class="duration">00:12</div>
+                <div style="position:absolute;top:6px;left:6px"><span class="tag" style="background:rgba(139,92,246,0.9);color:#fff;font-size:10px">📝 录制</span></div>
+              </div>
+              <div class="info">
+                <div class="title">用户登录-正常流程 (录制)</div>
+                <div class="meta"><span>订单系统</span><span>06-12</span></div>
+              </div>
+            </div>
+            <div class="video-card" onclick="openVideoModal('下单-支付宝支付 (执行)', '01:35')">
+              <div class="thumb" style="background:linear-gradient(135deg,#f0f9eb,#e1f3d8)">
+                <div class="play-icon">▶</div>
+                <div class="duration">01:35</div>
+                <div style="position:absolute;top:6px;left:6px"><span class="tag" style="background:rgba(64,158,255,0.9);color:#fff;font-size:10px">▶ 执行</span></div>
+                <div style="position:absolute;top:6px;right:6px"><span class="tag tag-success" style="font-size:10px">✅ 通过</span></div>
+              </div>
+              <div class="info">
+                <div class="title">下单-支付宝支付 (执行录制)</div>
+                <div class="meta"><span>支付系统</span><span>06-12</span></div>
+              </div>
+            </div>
+            <div class="video-card" onclick="openVideoModal('支付超时-失败案例 (执行)', '00:48')">
+              <div class="thumb" style="background:linear-gradient(135deg,#fef0f0,#fde2e2)">
+                <div class="play-icon">▶</div>
+                <div class="duration">00:48</div>
+                <div style="position:absolute;top:6px;left:6px"><span class="tag" style="background:rgba(64,158,255,0.9);color:#fff;font-size:10px">▶ 执行</span></div>
+                <div style="position:absolute;top:6px;right:6px"><span class="tag tag-fail" style="font-size:10px">❌ 失败</span></div>
+              </div>
+              <div class="info">
+                <div class="title">支付超时-失败案例 (执行录制)</div>
+                <div class="meta"><span>支付系统</span><span>06-12</span></div>
+              </div>
+            </div>
+            <div class="video-card" onclick="openVideoModal('APP首页加载 (执行)', '00:22')">
+              <div class="thumb" style="background:linear-gradient(135deg,#fdf6ec,#faecd8)">
+                <div class="play-icon">▶</div>
+                <div class="duration">00:22</div>
+                <div style="position:absolute;top:6px;left:6px"><span class="tag" style="background:rgba(64,158,255,0.9);color:#fff;font-size:10px">▶ 执行</span></div>
+                <div style="position:absolute;top:6px;right:6px"><span class="tag tag-success" style="font-size:10px">✅ 通过</span></div>
+              </div>
+              <div class="info">
+                <div class="title">APP首页加载 (执行录制)</div>
+                <div class="meta"><span>订单系统</span><span>06-11</span></div>
+              </div>
+            </div>
+            <div class="video-card" onclick="openVideoModal('搜索-空结果场景 (录制)', '00:08')">
+              <div class="thumb" style="background:linear-gradient(135deg,#e8f4fd,#d1ecf9)">
+                <div class="play-icon">▶</div>
+                <div class="duration">00:08</div>
+                <div style="position:absolute;top:6px;left:6px"><span class="tag" style="background:rgba(139,92,246,0.9);color:#fff;font-size:10px">📝 录制</span></div>
+              </div>
+              <div class="info">
+                <div class="title">搜索-空结果场景 (录制)</div>
+                <div class="meta"><span>订单系统</span><span>06-11</span></div>
+              </div>
+            </div>
+            <div class="video-card" onclick="openVideoModal('订单列表分页 (执行)', '00:56')">
+              <div class="thumb" style="background:linear-gradient(135deg,#f0f9eb,#e1f3d8)">
+                <div class="play-icon">▶</div>
+                <div class="duration">00:56</div>
+                <div style="position:absolute;top:6px;left:6px"><span class="tag" style="background:rgba(64,158,255,0.9);color:#fff;font-size:10px">▶ 执行</span></div>
+                <div style="position:absolute;top:6px;right:6px"><span class="tag tag-success" style="font-size:10px">✅ 通过</span></div>
+              </div>
+              <div class="info">
+                <div class="title">订单列表分页查询 (执行录制)</div>
+                <div class="meta"><span>订单系统</span><span>06-11</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="pagination" style="margin-top:16px">
+            <span class="page-info">共 86 个视频</span>
+            <span class="page-btn">‹</span>
+            <span class="page-btn active">1</span>
+            <span class="page-btn">2</span>
+            <span class="page-btn">3</span>
+            <span class="page-btn">...</span>
+            <span class="page-btn">9</span>
+            <span class="page-btn">›</span>
+          </div>
+        </div>
+
+        <!-- Tab: 智能检索 -->
+        <div id="kb-search" style="display:none">
+          <div class="card">
+            <div class="card-title">🤖 AI 智能检索</div>
+            <div style="display:flex;gap:8px;margin-bottom:16px">
+              <input class="search-input" style="flex:1" placeholder="用自然语言搜索知识库，如：订单系统有哪些登录相关的功能？">
+              <button class="btn btn-primary">搜索</button>
+            </div>
+            <div style="font-size:13px;color:var(--text-secondary)">
+              搜索范围: ☑ 案例库 ☑ 需求文档 ☑ 设计文档 ☑ 案例视频 ☑ 缺陷库 ☑ 数据库表<br>
+              <span style="font-size:12px">支持语义搜索，AI 将理解您的问题并从知识库中匹配最相关的内容</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ Execution Detail ============ -->
+      <div class="page-section" id="page-execution">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div class="page-title">执行详情 — 回归测试集 #EX-1024</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn">📥 导出报告</button>
+            <button class="btn btn-primary">🔄 重新执行</button>
+            <button class="btn">← 返回</button>
+          </div>
+        </div>
+        <div class="page-subtitle">订单系统 · 2026-06-12 09:30 · 触发方式: 手动 · 执行人: 管理员</div>
+
+        <div class="stat-cards" style="grid-template-columns:repeat(5,1fr);margin-bottom:16px">
+          <div class="stat-card"><div class="label">总计</div><div class="value">35</div></div>
+          <div class="stat-card" style="border-left:3px solid var(--success)"><div class="label">✅ 通过</div><div class="value" style="color:var(--success)">33</div></div>
+          <div class="stat-card" style="border-left:3px solid var(--danger)"><div class="label">❌ 失败</div><div class="value" style="color:var(--danger)">2</div></div>
+          <div class="stat-card"><div class="label">⏱ 总耗时</div><div class="value">8m 23s</div></div>
+          <div class="stat-card"><div class="label">📊 通过率</div><div class="value" style="color:var(--success)">94.3%</div></div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" onclick="switchExecTab(this,'exec-steps')">📝 步骤详情</div>
+          <div class="tab" onclick="switchExecTab(this,'exec-report')">📊 测试报告</div>
+          <div class="tab" onclick="switchExecTab(this,'exec-logs')">📜 执行日志</div>
+          <div class="tab" onclick="switchExecTab(this,'exec-compare')">🔍 截图对比</div>
+          <div class="tab" onclick="switchExecTab(this,'exec-video')">🎬 执行回放</div>
+          <div class="tab" onclick="switchExecTab(this,'exec-ai')">🤖 AI 分析</div>
+        </div>
+
+        <!-- Tab: 步骤详情 -->
+        <div id="exec-steps">
+          <div class="toolbar" style="margin-bottom:12px">
+            <select class="select-input"><option>全部案例 (35)</option><option>❌ 失败 (2)</option><option>✅ 通过 (33)</option></select>
+            <span style="flex:1"></span>
+            <span style="font-size:13px;color:var(--text-secondary)">💡 每个步骤自动截图+录屏，点击可放大查看</span>
+          </div>
+          <div class="step-exec-list">
+            <!-- Step 1: Pass -->
+            <div class="step-exec-item">
+              <div class="step-exec-header">
+                <div class="step-num pass">✓</div>
+                <div style="flex:1"><b>TC-001 用户登录-正常流程</b> <span class="tag tag-success" style="margin-left:8px">✅ 通过</span></div>
+                <div style="font-size:13px;color:var(--text-secondary)">⏱ 8.2s</div>
+                <div class="step-video-badge" onclick="openVideoModal('TC-001 执行录制', '00:08')">🎬 回放录像</div>
+              </div>
+              <div class="step-exec-body">
+                <div class="step-screenshots">
+                  <div class="step-screenshot">
+                    <div class="label">Step 1: 打开登录页</div>
+                    <div class="img-placeholder" style="background:linear-gradient(135deg,#e8f4fd,#d1ecf9)">
+                      <div style="text-align:center"><div style="font-size:20px">🌐</div><div>/login</div></div>
+                    </div>
+                  </div>
+                  <div class="step-screenshot">
+                    <div class="label">Step 2: 输入用户名</div>
+                    <div class="img-placeholder" style="background:linear-gradient(135deg,#e8f4fd,#d1ecf9)">
+                      <div style="text-align:center"><div style="font-size:13px">📝 admin</div><div style="font-size:10px;color:var(--success)">✓ #username</div></div>
+                    </div>
+                  </div>
+                  <div class="step-screenshot">
+                    <div class="label">Step 3: 输入密码</div>
+                    <div class="img-placeholder" style="background:linear-gradient(135deg,#e8f4fd,#d1ecf9)">
+                      <div style="text-align:center"><div style="font-size:13px">🔒 ******</div><div style="font-size:10px;color:var(--success)">✓ #password</div></div>
+                    </div>
+                  </div>
+                  <div class="step-screenshot">
+                    <div class="label">Step 4: 点击登录</div>
+                    <div class="img-placeholder" style="background:linear-gradient(135deg,#f0f9eb,#e1f3d8)">
+                      <div style="text-align:center"><div style="font-size:13px">🖱 点击</div><div style="font-size:10px;color:var(--success)">✓ .login-btn</div></div>
+                    </div>
+                  </div>
+                  <div class="step-screenshot">
+                    <div class="label">Step 5: 验证首页</div>
+                    <div class="img-placeholder" style="background:linear-gradient(135deg,#f0f9eb,#e1f3d8)">
+                      <div style="text-align:center"><div style="font-size:20px">✅</div><div style="font-size:10px">.home-page 可见</div></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="step-info">
+                  <div class="info-row"><span class="info-label">案例编码</span><span>TC-001</span></div>
+                  <div class="info-row"><span class="info-label">步骤数</span><span>5</span></div>
+                  <div class="info-row"><span class="info-label">截图数</span><span>5 张</span></div>
+                  <div class="info-row"><span class="info-label">录像</span><span class="step-video-badge" onclick="openVideoModal('TC-001 Step录像', '00:08')">🎬 有</span></div>
+                  <div class="info-row"><span class="info-label">对比</span><span class="compare-badge match">✓ 一致</span></div>
+                  <div style="margin-top:12px">
+                    <button class="btn btn-sm" style="width:100%;margin-bottom:4px">🔍 截图对比</button>
+                    <button class="btn btn-sm" style="width:100%">📋 查看详情</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2: FAIL with diff -->
+            <div class="step-exec-item" style="border-color:var(--danger)">
+              <div class="step-exec-header">
+                <div class="step-num fail">✕</div>
+                <div style="flex:1"><b>TC-002 下单-支付宝支付</b> <span class="tag tag-fail" style="margin-left:8px">❌ 失败</span></div>
+                <div style="font-size:13px;color:var(--text-secondary)">⏱ 12.3s</div>
+                <div class="step-video-badge" onclick="openVideoModal('TC-002 执行录制', '00:12')">🎬 回放录像</div>
+              </div>
+              <div class="step-exec-body">
+                <div class="step-screenshots">
+                  <div class="step-screenshot">
+                    <div class="label">Step 1: 打开首页 ✅</div>
+                    <div class="img-placeholder" style="background:linear-gradient(135deg,#f0f9eb,#e1f3d8)">
+                      <div style="text-align:center"><div style="font-size:20px">🏠</div><div>首页</div></div>
+                    </div>
+                  </div>
+                  <div class="step-screenshot">
+                    <div class="label">Step 2: 点击商品 ✅</div>
+                    <div class="img-placeholder" style="background:linear-gradient(135deg,#f0f9eb,#e1f3d8)">
+                      <div style="text-align:center"><div style="font-size:13px">🖱 点击商品</div></div>
+                    </div>
+                  </div>
+                  <div class="step-screenshot">
+                    <div class="label">Step 3: 加入购物车 ✅</div>
+                    <div class="img-placeholder" style="background:linear-gradient(135deg,#f0f9eb,#e1f3d8)">
+                      <div style="text-align:center"><div style="font-size:13px">🛒 已加入</div></div>
+                    </div>
+                  </div>
+                  <div class="step-screenshot">
+                    <div class="label" style="color:var(--danger)">Step 4: 点击支付 ❌</div>
+                    <div class="img-placeholder" style="background:linear-gradient(135deg,#fef0f0,#fde2e2);border:2px solid var(--danger)">
+                      <div style="text-align:center"><div style="font-size:20px">❌</div><div style="color:var(--danger);font-size:11px">Element not found</div><div style="font-size:10px">.pay-btn</div></div>
+                    </div>
+                  </div>
+                  <div class="step-screenshot">
+                    <div class="label" style="color:var(--info)">Step 5: 跳过</div>
+                    <div class="img-placeholder" style="background:var(--bg)">
+                      <div style="text-align:center"><div style="font-size:20px">⏭</div><div>已跳过</div></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="step-info">
+                  <div class="info-row"><span class="info-label">案例编码</span><span>TC-002</span></div>
+                  <div class="info-row"><span class="info-label">失败步骤</span><span style="color:var(--danger)">Step 4</span></div>
+                  <div class="info-row"><span class="info-label">错误</span><span style="color:var(--danger);font-size:12px">元素未找到</span></div>
+                  <div class="info-row"><span class="info-label">截图数</span><span>5 张</span></div>
+                  <div class="info-row"><span class="info-label">录像</span><span class="step-video-badge" onclick="openVideoModal('TC-002 Step录像', '00:12')">🎬 有</span></div>
+                  <div class="info-row"><span class="info-label">对比</span><span class="compare-badge diff">⚠ 样式差异</span></div>
+                  <div style="margin-top:12px">
+                    <button class="btn btn-sm" style="width:100%;margin-bottom:4px;background:var(--warning);color:#fff;border-color:var(--warning)">🔍 查看差异</button>
+                    <button class="btn btn-sm" style="width:100%;margin-bottom:4px">🐛 提缺陷</button>
+                    <button class="btn btn-sm" style="width:100%">📋 查看详情</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: 测试报告 -->
+        <div id="exec-report" style="display:none">
+          <div class="report-header">
+            <h2>📊 测试报告 — 回归测试集 #EX-1024</h2>
+            <div class="report-meta">
+              <span>📅 2026-06-12 09:30 ~ 09:38</span>
+              <span>🖥 订单系统</span>
+              <span>👤 执行人: 管理员</span>
+              <span>⚡ 触发: 手动</span>
+              <span>🌐 环境: staging</span>
+            </div>
+            <div class="report-score good">94.3%</div>
+            <div style="color:var(--success);font-weight:600">测试结论: 基本通过</div>
+          </div>
+
+          <div class="report-summary-grid">
+            <div class="report-summary-item"><div class="num">35</div><div class="label">总案例数</div></div>
+            <div class="report-summary-item"><div class="num" style="color:var(--success)">33</div><div class="label">✅ 通过</div></div>
+            <div class="report-summary-item"><div class="num" style="color:var(--danger)">2</div><div class="label">❌ 失败</div></div>
+            <div class="report-summary-item"><div class="num">8m 23s</div><div class="label">⏱ 总耗时</div></div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">📊 结果分布</div>
+              <div style="display:flex;align-items:center;gap:24px;justify-content:center;padding:16px">
+                <div style="position:relative;width:160px;height:160px">
+                  <svg viewBox="0 0 36 36" style="width:160px;height:160px;transform:rotate(-90deg)">
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--border)" stroke-width="3"></circle>
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--success)" stroke-width="3" stroke-dasharray="94.3 5.7" stroke-dashoffset="0"></circle>
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--danger)" stroke-width="3" stroke-dasharray="5.7 94.3" stroke-dashoffset="-94.3"></circle>
+                  </svg>
+                  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">
+                    <div style="font-size:24px;font-weight:700;color:var(--success)">94.3%</div>
+                    <div style="font-size:11px;color:var(--text-secondary)">通过率</div>
+                  </div>
+                </div>
+                <div style="font-size:13px">
+                  <div style="margin-bottom:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--success);margin-right:6px"></span>通过 33 (94.3%)</div>
+                  <div style="margin-bottom:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--danger);margin-right:6px"></span>失败 2 (5.7%)</div>
+                  <div><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--info);margin-right:6px"></span>跳过 0 (0%)</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">📈 趋势对比 (近7次执行)</div>
+              <div class="chart-placeholder" style="height:180px">
+                <div style="text-align:center;width:100%;padding:0 20px">
+                  <div style="display:flex;align-items:flex-end;justify-content:space-around;height:120px;padding:0 10px">
+                    <div style="text-align:center"><div style="width:32px;background:var(--success);border-radius:4px 4px 0 0;height:90px;margin:0 auto"></div><div style="font-size:10px;margin-top:4px;color:var(--text-secondary)">06-06</div></div>
+                    <div style="text-align:center"><div style="width:32px;background:var(--success);border-radius:4px 4px 0 0;height:85px;margin:0 auto"></div><div style="font-size:10px;margin-top:4px;color:var(--text-secondary)">06-07</div></div>
+                    <div style="text-align:center"><div style="width:32px;background:var(--warning);border-radius:4px 4px 0 0;height:60px;margin:0 auto"></div><div style="font-size:10px;margin-top:4px;color:var(--text-secondary)">06-08</div></div>
+                    <div style="text-align:center"><div style="width:32px;background:var(--success);border-radius:4px 4px 0 0;height:88px;margin:0 auto"></div><div style="font-size:10px;margin-top:4px;color:var(--text-secondary)">06-09</div></div>
+                    <div style="text-align:center"><div style="width:32px;background:var(--success);border-radius:4px 4px 0 0;height:92px;margin:0 auto"></div><div style="font-size:10px;margin-top:4px;color:var(--text-secondary)">06-10</div></div>
+                    <div style="text-align:center"><div style="width:32px;background:var(--danger);border-radius:4px 4px 0 0;height:50px;margin:0 auto"></div><div style="font-size:10px;margin-top:4px;color:var(--text-secondary)">06-11</div></div>
+                    <div style="text-align:center"><div style="width:32px;background:var(--success);border-radius:4px 4px 0 0;height:94px;margin:0 auto;border:2px solid var(--primary)"></div><div style="font-size:10px;margin-top:4px;color:var(--primary);font-weight:600">06-12</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">📋 按模块统计</div>
+              <table>
+                <thead><tr><th>模块</th><th>总数</th><th>通过</th><th>失败</th><th>通过率</th></tr></thead>
+                <tbody>
+                  <tr><td>登录模块</td><td>8</td><td>8</td><td>0</td><td><span style="color:var(--success)">100%</span></td></tr>
+                  <tr><td>下单模块</td><td>12</td><td>10</td><td>2</td><td><span style="color:var(--danger)">83.3%</span></td></tr>
+                  <tr><td>支付模块</td><td>8</td><td>8</td><td>0</td><td><span style="color:var(--success)">100%</span></td></tr>
+                  <tr><td>用户中心</td><td>7</td><td>7</td><td>0</td><td><span style="color:var(--success)">100%</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="card-title">🏷 按优先级统计</div>
+              <table>
+                <thead><tr><th>优先级</th><th>总数</th><th>通过</th><th>失败</th><th>通过率</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="tag tag-p0">P0</span></td><td>10</td><td>10</td><td>0</td><td><span style="color:var(--success)">100%</span></td></tr>
+                  <tr><td><span class="tag tag-p1">P1</span></td><td>15</td><td>14</td><td>1</td><td><span style="color:var(--warning)">93.3%</span></td></tr>
+                  <tr><td><span class="tag tag-p2">P2</span></td><td>10</td><td>9</td><td>1</td><td><span style="color:var(--warning)">90%</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">❌ 失败案例明细</div>
+            <table>
+              <thead><tr><th>案例编码</th><th>案例名称</th><th>优先级</th><th>失败步骤</th><th>错误信息</th><th>截图对比</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>TC-002</td><td>下单-支付宝支付</td><td><span class="tag tag-p0">P0</span></td>
+                  <td>Step 4</td><td style="color:var(--danger)">Element ".pay-btn" not found</td>
+                  <td><span class="compare-badge diff">⚠ 选择器变更</span></td>
+                  <td><button class="btn-text">查看日志</button> <button class="btn-text">提缺陷</button></td>
+                </tr>
+                <tr>
+                  <td>TC-018</td><td>下单-优惠券抵扣</td><td><span class="tag tag-p1">P1</span></td>
+                  <td>Step 6</td><td style="color:var(--danger)">Assertion failed: 金额不匹配</td>
+                  <td><span class="compare-badge match">✓ 无差异</span></td>
+                  <td><button class="btn-text">查看日志</button> <button class="btn-text">提缺陷</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🤖 AI 总结与建议</div>
+            <div style="background:var(--bg);border-radius:8px;padding:16px;font-size:14px;line-height:1.8">
+              <b>本次回归测试整体结论: </b><span style="color:var(--success);font-weight:600">基本通过 (94.3%)</span><br><br>
+              <b>关键发现:</b><br>
+              1. 🔴 <b>TC-002 下单支付</b>: 支付按钮选择器已变更 (.pay-btn → .pay-btn-new)，可能是前端重构导致。建议更新案例并检查相关案例。<br>
+              2. 🔴 <b>TC-018 优惠券抵扣</b>: 金额计算断言失败，可能存在计算逻辑变更，建议排查优惠券模块近期变更。<br>
+              3. 🟡 <b>TC-004 APP首页</b>: 虽然案例通过，但 Step 2 截图存在布局偏移(相似度87%)，建议人工确认。<br><br>
+              <b>建议措施:</b><br>
+              • 优先修复 TC-002 的选择器，避免后续执行持续失败<br>
+              • 对下单模块加强回归频率，该模块近期变更较多<br>
+              • 考虑为优惠券计算逻辑增加边界值测试案例
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:16px">
+            <button class="btn btn-primary">📥 导出 PDF 报告</button>
+            <button class="btn">📧 发送邮件</button>
+            <button class="btn">📋 复制到剪贴板</button>
+            <button class="btn">🔗 分享链接</button>
+          </div>
+        </div>
+
+        <!-- Tab: 执行日志 -->
+        <div id="exec-logs" style="display:none">
+          <div class="toolbar">
+            <input class="search-input" placeholder="🔍 搜索案例/日志内容" style="width:300px">
+            <select class="select-input"><option>全部状态</option><option>✅ 通过</option><option>❌ 失败</option></select>
+            <span style="flex:1"></span>
+            <button class="btn btn-sm">⏬ 导出全部日志</button>
+          </div>
+
+          <!-- Case 1: Pass -->
+          <div class="case-log-item">
+            <div class="case-log-header" onclick="toggleCaseLog(this)">
+              <div class="status-dot pass"></div>
+              <b>TC-001</b>
+              <span>用户登录-正常流程</span>
+              <span class="tag tag-success">✅ 通过</span>
+              <span style="margin-left:auto;font-size:12px;color:var(--text-secondary)">⏱ 8.2s · 5步骤 · 5截图 · 🎬有录像</span>
+              <span style="font-size:12px;color:var(--text-secondary)">▼</span>
+            </div>
+            <div class="case-log-body">
+              <div class="log-toolbar">
+                <span style="font-size:12px;color:var(--text-secondary)">日志级别:</span>
+                <span class="log-filter-btn active">全部</span>
+                <span class="log-filter-btn">INFO</span>
+                <span class="log-filter-btn">WARN</span>
+                <span class="log-filter-btn">ERROR</span>
+                <span class="log-filter-btn">DEBUG</span>
+                <span style="flex:1"></span>
+                <button class="btn btn-sm">📋 复制日志</button>
+                <button class="btn btn-sm">⏬ 下载</button>
+              </div>
+              <div class="log-viewer">
+<div class="log-line"><span class="log-time">09:30:12.001</span><span class="log-level info">INFO</span><span class="log-msg">━━━ 开始执行: TC-001 用户登录-正常流程 ━━━</span></div>
+<div class="log-line"><span class="log-time">09:30:12.015</span><span class="log-level info">INFO</span><span class="log-msg">环境: staging | 浏览器: Chromium 149.0.7778.96</span></div>
+<div class="log-line"><span class="log-time">09:30:12.100</span><span class="log-level debug">DEBUG</span><span class="log-msg">启动 Playwright 浏览器实例...</span></div>
+<div class="log-line"><span class="log-time">09:30:12.800</span><span class="log-level success">PASS</span><span class="log-msg">浏览器启动成功 (耗时 700ms)</span></div>
+<div class="log-line"><span class="log-time">09:30:12.850</span><span class="log-level info">INFO</span><span class="log-msg">📹 开始录制执行视频</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:13.001</span><span class="log-level info">INFO</span><span class="log-msg">[Step 1/5] 打开页面: https://staging.example.com/login</span></div>
+<div class="log-line"><span class="log-time">09:30:14.200</span><span class="log-level success">PASS</span><span class="log-msg">页面加载完成 (耗时 1199ms)</span></div>
+<div class="log-line"><span class="log-time">09:30:14.250</span><span class="log-level info">INFO</span><span class="log-msg">📷 截图已保存: step1_login_page.png</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:14.500</span><span class="log-level info">INFO</span><span class="log-msg">[Step 2/5] 输入: #username = "testuser"</span></div>
+<div class="log-line"><span class="log-time">09:30:14.800</span><span class="log-level success">PASS</span><span class="log-msg">输入完成 (耗时 300ms)</span></div>
+<div class="log-line"><span class="log-time">09:30:14.850</span><span class="log-level info">INFO</span><span class="log-msg">📷 截图已保存: step2_input_username.png</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:15.001</span><span class="log-level info">INFO</span><span class="log-msg">[Step 3/5] 输入: #password = "******"</span></div>
+<div class="log-line"><span class="log-time">09:30:15.300</span><span class="log-level success">PASS</span><span class="log-msg">输入完成 (耗时 299ms)</span></div>
+<div class="log-line"><span class="log-time">09:30:15.350</span><span class="log-level info">INFO</span><span class="log-msg">📷 截图已保存: step3_input_password.png</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:15.500</span><span class="log-level info">INFO</span><span class="log-msg">[Step 4/5] 点击: .login-btn</span></div>
+<div class="log-line"><span class="log-time">09:30:16.800</span><span class="log-level success">PASS</span><span class="log-msg">点击成功, 页面跳转完成 (耗时 1300ms)</span></div>
+<div class="log-line"><span class="log-time">09:30:16.850</span><span class="log-level info">INFO</span><span class="log-msg">📷 截图已保存: step4_click_login.png</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:17.001</span><span class="log-level info">INFO</span><span class="log-msg">[Step 5/5] 断言: .user-avatar 可见</span></div>
+<div class="log-line"><span class="log-time">09:30:17.200</span><span class="log-level success">PASS</span><span class="log-msg">断言通过: 元素 .user-avatar 可见 (耗时 199ms)</span></div>
+<div class="log-line"><span class="log-time">09:30:17.250</span><span class="log-level info">INFO</span><span class="log-msg">📷 截图已保存: step5_home_page.png</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:17.300</span><span class="log-level info">INFO</span><span class="log-msg">🔍 截图对比: 与上次成功执行(EX-1022)对比</span></div>
+<div class="log-line"><span class="log-time">09:30:17.500</span><span class="log-level success">PASS</span><span class="log-msg">截图对比结果: ✅ 全部一致 (平均相似度 99.2%)</span></div>
+<div class="log-line"><span class="log-time">09:30:17.600</span><span class="log-level info">INFO</span><span class="log-msg">⏹ 停止录制视频, 保存: tc001_execution.mp4 (00:08)</span></div>
+<div class="log-line"><span class="log-time">09:30:20.200</span><span class="log-level success">PASS</span><span class="log-msg">━━━ TC-001 执行完成: ✅ 通过 | 耗时: 8.2s | 截图: 5张 | 录像: tc001_execution.mp4 ━━━</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Case 2: FAIL -->
+          <div class="case-log-item" style="border-color:var(--danger)">
+            <div class="case-log-header" onclick="toggleCaseLog(this)" style="background:rgba(245,108,108,0.03)">
+              <div class="status-dot fail"></div>
+              <b>TC-002</b>
+              <span>下单-支付宝支付</span>
+              <span class="tag tag-fail">❌ 失败</span>
+              <span style="margin-left:auto;font-size:12px;color:var(--text-secondary)">⏱ 12.3s · 5步骤 · 5截图 · 🎬有录像</span>
+              <span style="font-size:12px;color:var(--text-secondary)">▼</span>
+            </div>
+            <div class="case-log-body open">
+              <div class="log-toolbar">
+                <span style="font-size:12px;color:var(--text-secondary)">日志级别:</span>
+                <span class="log-filter-btn active">全部</span>
+                <span class="log-filter-btn">INFO</span>
+                <span class="log-filter-btn">WARN</span>
+                <span class="log-filter-btn">ERROR</span>
+                <span class="log-filter-btn">DEBUG</span>
+                <span style="flex:1"></span>
+                <button class="btn btn-sm">📋 复制日志</button>
+                <button class="btn btn-sm">⏬ 下载</button>
+              </div>
+              <div class="log-viewer">
+<div class="log-line"><span class="log-time">09:30:21.001</span><span class="log-level info">INFO</span><span class="log-msg">━━━ 开始执行: TC-002 下单-支付宝支付 ━━━</span></div>
+<div class="log-line"><span class="log-time">09:30:21.015</span><span class="log-level info">INFO</span><span class="log-msg">环境: staging | 浏览器: Chromium 149.0.7778.96</span></div>
+<div class="log-line"><span class="log-time">09:30:21.800</span><span class="log-level success">PASS</span><span class="log-msg">浏览器启动成功</span></div>
+<div class="log-line"><span class="log-time">09:30:21.850</span><span class="log-level info">INFO</span><span class="log-msg">📹 开始录制执行视频</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:22.001</span><span class="log-level info">INFO</span><span class="log-msg">[Step 1/5] 打开页面: https://staging.example.com/</span></div>
+<div class="log-line"><span class="log-time">09:30:23.200</span><span class="log-level success">PASS</span><span class="log-msg">首页加载完成 (耗时 1199ms)</span></div>
+<div class="log-line"><span class="log-time">09:30:23.250</span><span class="log-level info">INFO</span><span class="log-msg">📷 截图已保存: step1_home.png</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:23.500</span><span class="log-level info">INFO</span><span class="log-msg">[Step 2/5] 点击: .product-item:first-child</span></div>
+<div class="log-line"><span class="log-time">09:30:24.100</span><span class="log-level success">PASS</span><span class="log-msg">点击成功, 进入商品详情 (耗时 600ms)</span></div>
+<div class="log-line"><span class="log-time">09:30:24.150</span><span class="log-level info">INFO</span><span class="log-msg">📷 截图已保存: step2_product_detail.png</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:24.500</span><span class="log-level info">INFO</span><span class="log-msg">[Step 3/5] 点击: .add-to-cart-btn (加入购物车)</span></div>
+<div class="log-line"><span class="log-time">09:30:25.200</span><span class="log-level success">PASS</span><span class="log-msg">加入购物车成功 (耗时 700ms)</span></div>
+<div class="log-line"><span class="log-time">09:30:25.250</span><span class="log-level info">INFO</span><span class="log-msg">📷 截图已保存: step3_cart.png</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:25.500</span><span class="log-level info">INFO</span><span class="log-msg">[Step 4/5] 点击: .pay-btn (去支付)</span></div>
+<div class="log-line"><span class="log-time">09:30:25.600</span><span class="log-level debug">DEBUG</span><span class="log-msg">等待元素 .pay-btn 出现... 超时设置: 3000ms</span></div>
+<div class="log-line"><span class="log-time">09:30:26.600</span><span class="log-level warn">WARN</span><span class="log-msg">元素 .pay-btn 未找到, 尝试备用选择器...</span></div>
+<div class="log-line"><span class="log-time">09:30:27.600</span><span class="log-level warn">WARN</span><span class="log-msg">备用选择器 [data-action="pay"] 也未找到</span></div>
+<div class="log-line"><span class="log-time">09:30:28.600</span><span class="log-level error">ERROR</span><span class="log-msg">超时! 元素 ".pay-btn" 在 3000ms 内未出现</span></div>
+<div class="log-line"><span class="log-time">09:30:28.650</span><span class="log-level error">ERROR</span><span class="log-msg">📷 错误截图已保存: step4_error_element_not_found.png</span></div>
+<div class="log-line"><span class="log-time">09:30:28.700</span><span class="log-level error">ERROR</span><span class="log-msg">❌ Step 4 执行失败: TimeoutError: Element ".pay-btn" not found</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:28.800</span><span class="log-level info">INFO</span><span class="log-msg">[Step 5/5] ⏭ 跳过 (前置步骤失败)</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:28.900</span><span class="log-level info">INFO</span><span class="log-msg">🔍 截图对比: 与上次成功执行(EX-1022)对比</span></div>
+<div class="log-line"><span class="log-time">09:30:29.100</span><span class="log-level warn">WARN</span><span class="log-msg">Step 1-3 截图对比: ✅ 一致</span></div>
+<div class="log-line"><span class="log-time">09:30:29.200</span><span class="log-level warn">WARN</span><span class="log-msg">Step 4 截图对比: ⚠ 选择器 .pay-btn 已变更, 当前页面包含 .pay-btn-new</span></div>
+<div class="log-line"><span class="log-time">09:30:29.300</span><span class="log-level info">INFO</span><span class="log-msg">⏹ 停止录制视频, 保存: tc002_execution.mp4 (00:12)</span></div>
+<div class="log-line"><span class="log-time">09:30:33.300</span><span class="log-level error">FAIL</span><span class="log-msg">━━━ TC-002 执行完成: ❌ 失败 | 耗时: 12.3s | 失败步骤: Step 4 | 错误: Element ".pay-btn" not found ━━━</span></div>
+<div class="log-line"><span class="log-time">09:30:33.350</span><span class="log-level info">INFO</span><span class="log-msg">💡 AI建议: 选择器 .pay-btn 可能已变更为 .pay-btn-new，建议更新案例</span></div>
+              </div>
+              <div style="margin-top:12px;display:flex;gap:8px">
+                <button class="btn btn-sm btn-primary">🔧 自动修复选择器</button>
+                <button class="btn btn-sm">🎬 查看录像</button>
+                <button class="btn btn-sm">🔍 截图对比</button>
+                <button class="btn btn-sm" style="background:var(--danger);color:#fff;border-color:var(--danger)">🐛 提缺陷</button>
+                <button class="btn btn-sm">🔄 重新执行</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Case 3: Pass -->
+          <div class="case-log-item">
+            <div class="case-log-header" onclick="toggleCaseLog(this)">
+              <div class="status-dot pass"></div>
+              <b>TC-003</b>
+              <span>获取用户信息接口</span>
+              <span class="tag tag-success">✅ 通过</span>
+              <span style="margin-left:auto;font-size:12px;color:var(--text-secondary)">⏱ 2.1s · 3步骤 · 无截图(API) </span>
+              <span style="font-size:12px;color:var(--text-secondary)">▼</span>
+            </div>
+            <div class="case-log-body">
+              <div class="log-toolbar">
+                <span style="font-size:12px;color:var(--text-secondary)">日志级别:</span>
+                <span class="log-filter-btn active">全部</span>
+                <span class="log-filter-btn">INFO</span>
+                <span class="log-filter-btn">WARN</span>
+                <span class="log-filter-btn">ERROR</span>
+                <span class="log-filter-btn">DEBUG</span>
+                <span style="flex:1"></span>
+                <button class="btn btn-sm">📋 复制日志</button>
+              </div>
+              <div class="log-viewer">
+<div class="log-line"><span class="log-time">09:30:34.001</span><span class="log-level info">INFO</span><span class="log-msg">━━━ 开始执行: TC-003 获取用户信息接口 ━━━</span></div>
+<div class="log-line"><span class="log-time">09:30:34.015</span><span class="log-level info">INFO</span><span class="log-msg">类型: API接口 | 目标: GET /api/user/12345</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:34.100</span><span class="log-level info">INFO</span><span class="log-msg">[Step 1/3] 发送请求: GET https://staging-api.example.com/user/12345</span></div>
+<div class="log-line"><span class="log-time">09:30:34.150</span><span class="log-level debug">DEBUG</span><span class="log-msg">Headers: { "Authorization": "Bearer ***", "Content-Type": "application/json" }</span></div>
+<div class="log-line"><span class="log-time">09:30:34.800</span><span class="log-level success">PASS</span><span class="log-msg">响应: 200 OK (耗时 650ms)</span></div>
+<div class="log-line"><span class="log-time">09:30:34.850</span><span class="log-level debug">DEBUG</span><span class="log-msg">Response Body: { "code": 200, "data": { "name": "testuser", "email": "test@example.com", "phone": "138****1234" } }</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:35.001</span><span class="log-level info">INFO</span><span class="log-msg">[Step 2/3] 断言: 状态码 = 200</span></div>
+<div class="log-line"><span class="log-time">09:30:35.010</span><span class="log-level success">PASS</span><span class="log-msg">断言通过: 200 = 200</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:35.100</span><span class="log-level info">INFO</span><span class="log-msg">[Step 3/3] 断言: $.data.name 不为空</span></div>
+<div class="log-line"><span class="log-time">09:30:35.110</span><span class="log-level success">PASS</span><span class="log-msg">断言通过: "testuser" 不为空</span></div>
+<div class="log-separator"></div>
+<div class="log-line"><span class="log-time">09:30:36.100</span><span class="log-level success">PASS</span><span class="log-msg">━━━ TC-003 执行完成: ✅ 通过 | 耗时: 2.1s ━━━</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- More cases (collapsed) -->
+          <div class="case-log-item">
+            <div class="case-log-header" onclick="toggleCaseLog(this)">
+              <div class="status-dot pass"></div>
+              <b>TC-004</b><span>APP首页加载测试</span><span class="tag tag-success">✅ 通过</span>
+              <span class="compare-badge diff" style="margin-left:8px">⚠ 样式差异</span>
+              <span style="margin-left:auto;font-size:12px;color:var(--text-secondary)">⏱ 6.5s · 4步骤</span>
+              <span style="font-size:12px;color:var(--text-secondary)">▼</span>
+            </div>
+            <div class="case-log-body"></div>
+          </div>
+          <div class="case-log-item">
+            <div class="case-log-header" onclick="toggleCaseLog(this)">
+              <div class="status-dot pass"></div>
+              <b>TC-005</b><span>搜索-空结果场景</span><span class="tag tag-success">✅ 通过</span>
+              <span style="margin-left:auto;font-size:12px;color:var(--text-secondary)">⏱ 4.3s · 3步骤</span>
+              <span style="font-size:12px;color:var(--text-secondary)">▼</span>
+            </div>
+            <div class="case-log-body"></div>
+          </div>
+          <div class="case-log-item">
+            <div class="case-log-header" onclick="toggleCaseLog(this)">
+              <div class="status-dot pass"></div>
+              <b>TC-006 ~ TC-035</b><span>其余 30 个案例</span><span class="tag tag-success">✅ 全部通过</span>
+              <span style="margin-left:auto;font-size:12px;color:var(--text-secondary)">⏱ 共 5m 32s</span>
+              <span style="font-size:12px;color:var(--text-secondary)">▼</span>
+            </div>
+            <div class="case-log-body">
+              <div style="text-align:center;padding:20px;color:var(--text-secondary)">
+                展开可查看每个案例的详细日志...
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;color:var(--text-secondary)">共 35 个案例日志 · 总大小 156KB</span>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-sm">📥 打包下载全部日志</button>
+              <button class="btn btn-sm">📋 合并导出</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: 截图对比 -->
+        <div id="exec-compare" style="display:none">
+          <div class="card">
+            <div class="card-title">🔍 截图对比 — TC-002 下单-支付宝支付</div>
+            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">
+              将本次执行截图与上次成功执行的截图进行对比，检测样式/布局变化<br>
+              <span style="color:var(--warning)">⚠ 发现 2 处差异</span>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+              <div>
+                <div style="font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px">Step 3: 加入购物车 <span class="compare-badge match">✓ 一致</span></div>
+                <div style="display:flex;gap:8px">
+                  <div style="flex:1">
+                    <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;text-align:center">上次成功 (06-11)</div>
+                    <div class="img-placeholder" style="max-width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#f0f9eb,#e1f3d8)">
+                      <div style="text-align:center"><div>🛒 购物车页面</div><div style="font-size:10px">快照 #EX-1022</div></div>
+                    </div>
+                  </div>
+                  <div style="flex:1">
+                    <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;text-align:center">本次执行 (06-12)</div>
+                    <div class="img-placeholder" style="max-width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#f0f9eb,#e1f3d8)">
+                      <div style="text-align:center"><div>🛒 购物车页面</div><div style="font-size:10px">快照 #EX-1024</div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div style="font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px">Step 4: 点击支付 <span class="compare-badge diff">⚠ 差异</span></div>
+                <div style="display:flex;gap:8px">
+                  <div style="flex:1">
+                    <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;text-align:center">上次成功 (06-11)</div>
+                    <div class="img-placeholder" style="max-width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#f0f9eb,#e1f3d8)">
+                      <div style="text-align:center"><div>💳 支付按钮</div><div style="font-size:10px">.pay-btn ✓</div></div>
+                    </div>
+                  </div>
+                  <div style="flex:1">
+                    <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;text-align:center">本次执行 (06-12)</div>
+                    <div class="img-placeholder diff" style="max-width:100%;aspect-ratio:16/10">
+                      <div class="diff-overlay">
+                        <div style="text-align:center;background:rgba(230,162,60,0.8);color:#fff;padding:4px 8px;border-radius:4px;font-size:11px">⚠ 按钮选择器已变更<br>.pay-btn → .pay-btn-new</div>
+                      </div>
+                      <div style="text-align:center"><div>❌ 元素未找到</div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="background:var(--bg);border-radius:8px;padding:16px">
+              <div style="font-weight:600;margin-bottom:8px">🔀 滑动对比模式 (拖动滑块)</div>
+              <div style="display:flex;justify-content:center">
+                <div class="diff-slider-container" style="max-width:480px;aspect-ratio:16/10">
+                  <div class="diff-after" style="background:linear-gradient(135deg,#fef0f0,#fde2e2);font-size:13px">
+                    <div style="text-align:center"><div style="font-size:10px;position:absolute;top:6px;right:6px;background:rgba(245,108,108,0.8);color:#fff;padding:1px 6px;border-radius:3px">本次</div>❌ 支付按钮丢失</div>
+                  </div>
+                  <div class="diff-before" style="background:linear-gradient(135deg,#f0f9eb,#e1f3d8);font-size:13px;z-index:1">
+                    <div style="text-align:center"><div style="font-size:10px;position:absolute;top:6px;left:6px;background:rgba(103,194,58,0.8);color:#fff;padding:1px 6px;border-radius:3px">上次</div>✅ 支付按钮正常</div>
+                  </div>
+                  <div class="diff-slider-handle"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">📊 全案例对比汇总</div>
+            <table>
+              <thead><tr><th>案例</th><th>步骤数</th><th>对比结果</th><th>差异步骤</th><th>差异类型</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td>TC-001 用户登录</td><td>5</td><td><span class="compare-badge match">✓ 完全一致</span></td><td>-</td><td>-</td><td><button class="btn-text">详情</button></td></tr>
+                <tr><td>TC-002 下单支付</td><td>5</td><td><span class="compare-badge diff">⚠ 有差异</span></td><td>Step 4</td><td>选择器变更</td><td><button class="btn-text" style="color:var(--warning)">查看差异</button></td></tr>
+                <tr><td>TC-003 用户信息</td><td>3</td><td><span class="compare-badge match">✓ 完全一致</span></td><td>-</td><td>-</td><td><button class="btn-text">详情</button></td></tr>
+                <tr><td>TC-004 APP首页</td><td>4</td><td><span class="compare-badge diff">⚠ 样式差异</span></td><td>Step 2</td><td>布局偏移</td><td><button class="btn-text" style="color:var(--warning)">查看差异</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab: 执行回放 -->
+        <div id="exec-video" style="display:none">
+          <div class="card">
+            <div class="card-title">🎬 执行录像回放</div>
+            <div style="display:flex;gap:16px;margin-bottom:16px">
+              <select class="select-input" id="replay-case-select">
+                <option>TC-001 用户登录-正常流程 (00:08)</option>
+                <option selected>TC-002 下单-支付宝支付 (00:12) ❌</option>
+                <option>TC-003 获取用户信息 (00:05)</option>
+              </select>
+              <button class="btn btn-primary" onclick="openVideoModal('TC-002 完整执行回放', '00:12')">▶ 播放完整录像</button>
+              <button class="btn">⏬ 下载视频</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div style="display:flex;gap:16px">
+              <div style="flex:1">
+                <div style="aspect-ratio:16/9;background:#000;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;flex-direction:column;gap:12px;margin-bottom:12px">
+                  <div style="font-size:60px;cursor:pointer" onclick="openVideoModal('TC-002 步骤4回放', '00:03')">▶</div>
+                  <div style="font-size:14px">TC-002 · Step 4: 点击支付 (失败)</div>
+                  <div style="font-size:12px;color:rgba(255,255,255,0.6)">00:03 / 00:12</div>
+                </div>
+                <div class="video-controls" style="background:var(--bg);border-radius:8px">
+                  <button class="btn btn-sm">⏮</button>
+                  <button class="btn btn-sm btn-primary">▶</button>
+                  <button class="btn btn-sm">⏭</button>
+                  <div class="video-progress"><div class="video-progress-fill"></div></div>
+                  <span class="video-time">00:03 / 00:12</span>
+                  <button class="btn btn-sm">🔍</button>
+                </div>
+              </div>
+              <div style="width:300px;flex-shrink:0">
+                <div style="font-weight:600;margin-bottom:12px">📝 步骤时间线</div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;gap:8px;align-items:center;padding:8px;border-radius:6px;background:rgba(103,194,58,0.08);font-size:13px">
+                    <span style="color:var(--success)">✅</span>
+                    <div style="flex:1"><div>Step 1: 打开首页</div><div style="font-size:11px;color:var(--text-secondary)">00:00 - 00:01</div></div>
+                    <span class="step-video-badge" style="font-size:10px">🎬</span>
+                  </div>
+                  <div style="display:flex;gap:8px;align-items:center;padding:8px;border-radius:6px;background:rgba(103,194,58,0.08);font-size:13px">
+                    <span style="color:var(--success)">✅</span>
+                    <div style="flex:1"><div>Step 2: 点击商品</div><div style="font-size:11px;color:var(--text-secondary)">00:01 - 00:02</div></div>
+                    <span class="step-video-badge" style="font-size:10px">🎬</span>
+                  </div>
+                  <div style="display:flex;gap:8px;align-items:center;padding:8px;border-radius:6px;background:rgba(103,194,58,0.08);font-size:13px">
+                    <span style="color:var(--success)">✅</span>
+                    <div style="flex:1"><div>Step 3: 加入购物车</div><div style="font-size:11px;color:var(--text-secondary)">00:02 - 00:03</div></div>
+                    <span class="step-video-badge" style="font-size:10px">🎬</span>
+                  </div>
+                  <div style="display:flex;gap:8px;align-items:center;padding:8px;border-radius:6px;background:rgba(245,108,108,0.08);border:1px solid var(--danger);font-size:13px">
+                    <span style="color:var(--danger)">❌</span>
+                    <div style="flex:1"><div><b>Step 4: 点击支付</b></div><div style="font-size:11px;color:var(--danger)">00:03 - 00:06 失败!</div></div>
+                    <span class="step-video-badge" style="font-size:10px">🎬</span>
+                  </div>
+                  <div style="display:flex;gap:8px;align-items:center;padding:8px;border-radius:6px;background:var(--bg);font-size:13px;opacity:0.5">
+                    <span>⏭</span>
+                    <div style="flex:1"><div>Step 5: 验证支付结果</div><div style="font-size:11px;color:var(--text-secondary)">已跳过</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🎬 全部执行录像</div>
+            <div class="video-grid">
+              <div class="video-card" onclick="openVideoModal('TC-001 执行录像', '00:08')">
+                <div class="thumb" style="background:linear-gradient(135deg,#f0f9eb,#e1f3d8)"><div class="play-icon">▶</div><div class="duration">00:08</div><div style="position:absolute;top:6px;right:6px"><span class="tag tag-success" style="font-size:10px">✅</span></div></div>
+                <div class="info"><div class="title">TC-001 用户登录</div><div class="meta"><span>5步</span><span>8.2s</span></div></div>
+              </div>
+              <div class="video-card" onclick="openVideoModal('TC-002 执行录像', '00:12')">
+                <div class="thumb" style="background:linear-gradient(135deg,#fef0f0,#fde2e2)"><div class="play-icon">▶</div><div class="duration">00:12</div><div style="position:absolute;top:6px;right:6px"><span class="tag tag-fail" style="font-size:10px">❌</span></div></div>
+                <div class="info"><div class="title">TC-002 下单支付</div><div class="meta"><span>5步</span><span>12.3s</span></div></div>
+              </div>
+              <div class="video-card" onclick="openVideoModal('TC-003 执行录像', '00:05')">
+                <div class="thumb" style="background:linear-gradient(135deg,#f0f9eb,#e1f3d8)"><div class="play-icon">▶</div><div class="duration">00:05</div><div style="position:absolute;top:6px;right:6px"><span class="tag tag-success" style="font-size:10px">✅</span></div></div>
+                <div class="info"><div class="title">TC-003 用户信息</div><div class="meta"><span>3步</span><span>5.1s</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: AI分析 -->
+        <div id="exec-ai" style="display:none">
+          <div class="card">
+            <div class="card-title">🤖 AI 执行分析</div>
+            <div style="background:var(--bg);border-radius:8px;padding:16px;margin-bottom:16px">
+              <div style="font-weight:600;margin-bottom:12px">📊 本次执行摘要</div>
+              <div style="font-size:14px;line-height:1.8">
+                本次执行了回归测试集中的 <b>35</b> 个案例，总耗时 <b>8分23秒</b>。<br>
+                通过 <b>33</b> 个 (94.3%)，失败 <b>2</b> 个 (5.7%)。<br>
+                与上次执行 (EX-1023) 相比，通过率从 <span style="color:var(--danger)">78%</span> 提升至 <span style="color:var(--success)">94.3%</span>。
+              </div>
+            </div>
+            <div style="background:rgba(245,108,108,0.05);border:1px solid rgba(245,108,108,0.2);border-radius:8px;padding:16px;margin-bottom:16px">
+              <div style="font-weight:600;margin-bottom:12px;color:var(--danger)">🔴 失败分析 — TC-002 下单-支付宝支付</div>
+              <div style="font-size:14px;line-height:1.8">
+                <b>失败步骤:</b> Step 4 — 点击支付按钮<br>
+                <b>错误信息:</b> Element ".pay-btn" not found (等待 3s 超时)<br>
+                <b>截图对比:</b> <span class="compare-badge diff">⚠ 选择器变更</span><br><br>
+                <b>🤖 AI 诊断:</b><br>
+                支付按钮的 CSS 选择器从 <code>.pay-btn</code> 变更为 <code>.pay-btn-new</code>，
+                可能是前端在最近的发布中重构了支付组件。建议:<br>
+                1. 更新案例 TC-002 的 Step 4 选择器为 <code>.pay-btn-new</code><br>
+                2. 检查是否有其他案例使用了相同的选择器<br>
+                3. 确认此变更是否已在需求变更中记录
+              </div>
+              <div style="margin-top:12px;display:flex;gap:8px">
+                <button class="btn btn-sm btn-primary">🔧 自动修复选择器</button>
+                <button class="btn btn-sm">🐛 创建缺陷</button>
+                <button class="btn btn-sm">📋 复制到剪贴板</button>
+              </div>
+            </div>
+            <div style="background:rgba(230,162,60,0.05);border:1px solid rgba(230,162,60,0.2);border-radius:8px;padding:16px">
+              <div style="font-weight:600;margin-bottom:12px;color:var(--warning)">🟡 样式差异提醒 — TC-004 APP首页加载</div>
+              <div style="font-size:14px;line-height:1.8">
+                虽然案例 <b>通过</b>，但 Step 2 的截图与上次成功执行相比存在 <b>布局偏移</b> (相似度 87%)。<br>
+                可能是响应式布局调整导致，建议人工确认是否属于预期变更。
+              </div>
+              <div style="margin-top:12px;display:flex;gap:8px">
+                <button class="btn btn-sm btn-primary">🔍 查看差异</button>
+                <button class="btn btn-sm">✅ 确认无问题</button>
+                <button class="btn btn-sm">🐛 创建缺陷</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ Defects ============ -->
+      <div class="page-section" id="page-defects">
+        <div class="page-title">缺陷库 & 风险分析</div>
+        <div class="page-subtitle">管理缺陷跟踪和 AI 风险分析</div>
+        <div class="stat-cards" style="grid-template-columns:repeat(5,1fr)">
+          <div class="stat-card" style="border-left:3px solid var(--danger)"><div class="label">🔴 S1 严重</div><div class="value" style="color:var(--danger)">3</div><div class="trend">待修复</div></div>
+          <div class="stat-card" style="border-left:3px solid var(--warning)"><div class="label">🟠 S2 重要</div><div class="value" style="color:var(--warning)">8</div><div class="trend">处理中</div></div>
+          <div class="stat-card" style="border-left:3px solid #f0e020"><div class="label">🟡 S3 一般</div><div class="value">15</div><div class="trend">待修复</div></div>
+          <div class="stat-card" style="border-left:3px solid var(--primary)"><div class="label">🔵 S4 建议</div><div class="value">7</div><div class="trend">已关闭</div></div>
+          <div class="stat-card"><div class="label">📊 总计</div><div class="value">33</div><div class="trend">活跃缺陷</div></div>
+        </div>
+        <div class="toolbar">
+          <input class="search-input" placeholder="🔍 搜索缺陷">
+          <select class="select-input"><option>严重度</option><option>S1</option><option>S2</option><option>S3</option><option>S4</option></select>
+          <select class="select-input"><option>状态</option><option>OPEN</option><option>FIXED</option><option>VERIFIED</option><option>CLOSED</option></select>
+          <span style="flex:1"></span>
+          <button class="btn btn-primary">+ 新建缺陷</button>
+          <button class="btn" style="background:#8B5CF6;color:#fff;border-color:#8B5CF6">📊 AI风险分析</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table>
+            <thead><tr><th>编号</th><th>缺陷标题</th><th>严重度</th><th>所属系统</th><th>状态</th><th>关联案例</th><th>指派给</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr><td>BUG-001</td><td>支付超时未给出提示信息</td><td><span class="tag tag-p0">S1</span></td><td>支付系统</td><td><span class="tag" style="background:#fef0f0;color:#F56C6C">OPEN</span></td><td>TC-002</td><td>张三</td><td><button class="btn-text">详情</button></td></tr>
+              <tr><td>BUG-002</td><td>登录密码不校验长度</td><td><span class="tag tag-p1">S2</span></td><td>用户系统</td><td><span class="tag" style="background:#ecf5ff;color:#409EFF">FIXED</span></td><td>TC-001</td><td>李四</td><td><button class="btn-text">详情</button></td></tr>
+              <tr><td>BUG-003</td><td>列表翻页数据重复显示</td><td><span class="tag tag-p1">S3</span></td><td>订单系统</td><td><span class="tag" style="background:#fef0f0;color:#F56C6C">OPEN</span></td><td>TC-010</td><td>王五</td><td><button class="btn-text">详情</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-title">🤖 AI 风险分析</div>
+          <div style="display:flex;gap:12px;margin-bottom:16px">
+            <select class="select-input"><option>订单系统</option><option>支付系统</option><option>用户系统</option></select>
+            <select class="select-input"><option>回归风险</option><option>影响分析</option><option>覆盖率分析</option></select>
+            <button class="btn btn-primary">🤖 开始分析</button>
+          </div>
+          <div style="background:var(--bg);border-radius:8px;padding:16px">
+            <div style="font-weight:600;margin-bottom:12px">风险等级: <span style="color:var(--warning)">🟠 高</span></div>
+            <div style="margin-bottom:12px"><b>1. 🔴 支付模块近期改动频繁，回归风险高</b><br><span style="color:var(--text-secondary);font-size:13px">影响: 3个核心案例 &nbsp; 建议: 增加冒烟测试频率</span></div>
+            <div style="margin-bottom:12px"><b>2. 🟠 用户模块 v2.3 版本上线，影响登录/注册流程</b><br><span style="color:var(--text-secondary);font-size:13px">影响: 5个案例需更新 &nbsp; 建议: 重新执行全部登录相关案例</span></div>
+            <div><b>3. 🟡 数据库 users 表新增字段，可能影响接口案例</b><br><span style="color:var(--text-secondary);font-size:13px">影响: 2个API案例 &nbsp; 建议: 更新响应契约</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ SKILLs ============ -->
+      <div class="page-section" id="page-skills">
+        <div class="page-title">SKILL 管理</div>
+        <div class="page-subtitle">AI 能力管理 — 自学习、自进化、意图驱动</div>
+        <div class="toolbar">
+          <input class="search-input" placeholder="🔍 搜索 SKILL">
+          <select class="select-input"><option>类型</option><option>BUILTIN</option><option>CUSTOM</option><option>LEARNED</option></select>
+          <select class="select-input"><option>分类</option><option>TESTING</option><option>ANALYSIS</option><option>GENERATION</option><option>EXECUTION</option></select>
+          <span style="flex:1"></span>
+          <button class="btn btn-primary">+ 新建 SKILL</button>
+          <button class="btn" style="background:#8B5CF6;color:#fff;border-color:#8B5CF6">🧪 实验场</button>
+        </div>
+        <div class="skill-grid">
+          <div class="skill-card">
+            <div class="skill-icon">🤖</div>
+            <div class="skill-name">智能案例生成</div>
+            <div class="skill-type">LLM 类型 · GENERATION</div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">根据需求描述自动生成测试案例</div>
+            <div class="skill-stats">
+              <div class="stat"><span class="stat-value">95%</span>置信度</div>
+              <div class="stat"><span class="stat-value">156</span>使用次数</div>
+              <div class="stat"><span class="stat-value" style="color:var(--success)">93%</span>成功率</div>
+            </div>
+            <div style="margin-top:12px"><button class="btn btn-sm btn-primary">▶ 测试</button> <button class="btn-text">⋮</button></div>
+          </div>
+          <div class="skill-card">
+            <div class="skill-icon">🔍</div>
+            <div class="skill-name">需求文档解析</div>
+            <div class="skill-type">LLM 类型 · ANALYSIS</div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">解析需求文档，提取功能点和业务规则</div>
+            <div class="skill-stats">
+              <div class="stat"><span class="stat-value">88%</span>置信度</div>
+              <div class="stat"><span class="stat-value">89</span>使用次数</div>
+              <div class="stat"><span class="stat-value" style="color:var(--success)">85%</span>成功率</div>
+            </div>
+            <div style="margin-top:12px"><button class="btn btn-sm btn-primary">▶ 测试</button> <button class="btn-text">⋮</button></div>
+          </div>
+          <div class="skill-card">
+            <div class="skill-icon">📝</div>
+            <div class="skill-name">Playwright脚本生成</div>
+            <div class="skill-type">CODE 类型 · GENERATION</div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">将自然语言步骤转为可执行脚本</div>
+            <div class="skill-stats">
+              <div class="stat"><span class="stat-value">92%</span>置信度</div>
+              <div class="stat"><span class="stat-value">45</span>使用次数</div>
+              <div class="stat"><span class="stat-value" style="color:var(--success)">91%</span>成功率</div>
+            </div>
+            <div style="margin-top:12px"><button class="btn btn-sm btn-primary">▶ 测试</button> <button class="btn-text">⋮</button></div>
+          </div>
+          <div class="skill-card">
+            <div class="skill-icon">🐛</div>
+            <div class="skill-name">缺陷根因分析</div>
+            <div class="skill-type">WORKFLOW 类型 · ANALYSIS</div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">分析缺陷根本原因和修复建议</div>
+            <div class="skill-stats">
+              <div class="stat"><span class="stat-value">85%</span>置信度</div>
+              <div class="stat"><span class="stat-value">67</span>使用次数</div>
+              <div class="stat"><span class="stat-value" style="color:var(--success)">82%</span>成功率</div>
+            </div>
+            <div style="margin-top:12px"><button class="btn btn-sm btn-primary">▶ 测试</button> <button class="btn-text">⋮</button></div>
+          </div>
+          <div class="skill-card">
+            <div class="skill-icon">📊</div>
+            <div class="skill-name">回归风险评估</div>
+            <div class="skill-type">LLM 类型 · ANALYSIS</div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">评估变更带来的回归测试风险</div>
+            <div class="skill-stats">
+              <div class="stat"><span class="stat-value">90%</span>置信度</div>
+              <div class="stat"><span class="stat-value">34</span>使用次数</div>
+              <div class="stat"><span class="stat-value" style="color:var(--success)">88%</span>成功率</div>
+            </div>
+            <div style="margin-top:12px"><button class="btn btn-sm btn-primary">▶ 测试</button> <button class="btn-text">⋮</button></div>
+          </div>
+          <div class="skill-card" style="border:2px dashed var(--primary);background:rgba(64,158,255,0.02)">
+            <div class="skill-icon" style="color:var(--primary)">✨</div>
+            <div class="skill-name" style="color:var(--primary)">自学习 SKILL</div>
+            <div class="skill-type">LEARNED · 从经验中生成</div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">AI 从成功/失败经验中自动学习生成新 SKILL</div>
+            <div class="skill-stats">
+              <div class="stat"><span class="stat-value">5</span>本月新增</div>
+              <div class="stat"><span class="stat-value">3</span>进化次数</div>
+              <div class="stat"><span class="stat-value">1</span>已淘汰</div>
+            </div>
+            <div style="margin-top:12px"><button class="btn btn-sm">查看经验库</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ LLM Chat ============ -->
+      <div class="page-section" id="page-chat">
+        <div style="display:flex;height:calc(100vh - 140px);gap:0">
+          <div class="card" style="width:260px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;margin-right:16px">
+            <button class="btn btn-primary" style="margin-bottom:12px;width:100%">+ 新建会话</button>
+            <input class="search-input" placeholder="🔍 搜索会话" style="width:100%;margin-bottom:12px">
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">── 今天 ──</div>
+            <div style="padding:10px;border-radius:6px;background:rgba(64,158,255,0.08);margin-bottom:4px;cursor:pointer;border-left:3px solid var(--primary)">
+              <div style="font-weight:600;font-size:13px">🤖 测试案例设计</div>
+              <div style="font-size:12px;color:var(--text-secondary)">3 分钟前</div>
+            </div>
+            <div style="padding:10px;border-radius:6px;cursor:pointer;margin-bottom:4px">
+              <div style="font-weight:500;font-size:13px">📋 登录模块分析</div>
+              <div style="font-size:12px;color:var(--text-secondary)">1 小时前</div>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);margin:6px 0">── 昨天 ──</div>
+            <div style="padding:10px;border-radius:6px;cursor:pointer;margin-bottom:4px">
+              <div style="font-weight:500;font-size:13px">📊 回归风险分析</div>
+              <div style="font-size:12px;color:var(--text-secondary)">昨天 15:30</div>
+            </div>
+            <div style="padding:10px;border-radius:6px;cursor:pointer;margin-bottom:4px">
+              <div style="font-weight:500;font-size:13px">🔌 API测试辅助</div>
+              <div style="font-size:12px;color:var(--text-secondary)">昨天 10:20</div>
+            </div>
+          </div>
+          <div class="card" style="flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0">
+            <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+              <div style="font-weight:600">🤖 AI 助手</div>
+              <div style="font-size:12px;color:var(--text-secondary)">当前会话: 测试案例设计</div>
+            </div>
+            <div style="flex:1;overflow-y:auto;padding:20px">
+              <div style="margin-bottom:20px">
+                <div style="display:flex;gap:10px;align-items:flex-start">
+                  <div style="width:32px;height:32px;border-radius:50%;background:#8B5CF6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🤖</div>
+                  <div>
+                    <div style="font-weight:600;margin-bottom:6px;font-size:13px">AI 助手</div>
+                    <div style="background:var(--bg);padding:12px 16px;border-radius:8px;max-width:600px">
+                      你好！我是 AI 测试助手。你可以：<br>
+                      • 让我根据需求生成测试案例<br>
+                      • 让我分析某个功能的测试范围<br>
+                      • 让我执行某个测试案例<br>
+                      • 让我帮你排查缺陷原因
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-bottom:20px">
+                <div style="display:flex;gap:10px;align-items:flex-start;flex-direction:row-reverse">
+                  <div style="width:32px;height:32px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">我</div>
+                  <div style="background:rgba(64,158,255,0.1);padding:12px 16px;border-radius:8px;max-width:500px">
+                    请帮我为用户登录功能生成测试案例
+                  </div>
+                </div>
+              </div>
+              <div style="margin-bottom:8px">
+                <div style="display:flex;gap:10px;align-items:flex-start">
+                  <div style="width:32px;height:32px;border-radius:50%;background:#8B5CF6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🤖</div>
+                  <div style="flex:1">
+                    <div style="font-weight:600;margin-bottom:6px;font-size:13px">AI 助手 <span style="font-weight:400;color:var(--text-secondary)">· 正在调用 SKILL</span></div>
+                    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:13px">
+                      <div style="margin-bottom:4px">🔄 调用 SKILL: <b>case-generator</b></div>
+                      <div style="margin-bottom:4px">📖 参考知识库: 登录模块历史案例 (5条)</div>
+                      <div>📖 参考知识库: 需求文档v2.3</div>
+                    </div>
+                    <div style="background:var(--bg);padding:12px 16px;border-radius:8px;max-width:700px">
+                      已为「用户登录」生成 <b>8 条</b>测试案例：<br><br>
+                      <table style="font-size:12px">
+                        <thead><tr><th>#</th><th>案例名称</th><th>级别</th><th>操作</th></tr></thead>
+                        <tbody>
+                          <tr><td>1</td><td>正常登录-有效账号密码</td><td><span class="tag tag-p0">P0</span></td><td><button class="btn-text" style="font-size:12px">查看</button> <button class="btn-text" style="font-size:12px">+加入</button></td></tr>
+                          <tr><td>2</td><td>密码错误-提示校验</td><td><span class="tag tag-p1">P1</span></td><td><button class="btn-text" style="font-size:12px">查看</button> <button class="btn-text" style="font-size:12px">+加入</button></td></tr>
+                          <tr><td>3</td><td>用户名为空-前端校验</td><td><span class="tag tag-p1">P1</span></td><td><button class="btn-text" style="font-size:12px">查看</button> <button class="btn-text" style="font-size:12px">+加入</button></td></tr>
+                          <tr><td>4</td><td>记住密码功能验证</td><td><span class="tag tag-p2">P2</span></td><td><button class="btn-text" style="font-size:12px">查看</button> <button class="btn-text" style="font-size:12px">+加入</button></td></tr>
+                          <tr><td>5</td><td>连续5次错误-账号锁定</td><td><span class="tag tag-p1">P1</span></td><td><button class="btn-text" style="font-size:12px">查看</button> <button class="btn-text" style="font-size:12px">+加入</button></td></tr>
+                        </tbody>
+                      </table>
+                      <div style="margin-top:12px;display:flex;gap:8px">
+                        <button class="btn btn-sm btn-primary">📥 全部加入案例库</button>
+                        <button class="btn btn-sm">📋 复制</button>
+                        <button class="btn btn-sm">👍 有帮助</button>
+                        <button class="btn btn-sm">👎 无用</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:8px">
+              <button class="btn" title="上传文件">📎</button>
+              <input class="search-input" style="flex:1" placeholder="输入消息... (/生成案例 /分析需求 /执行测试)">
+              <button class="btn" title="快捷指令">🚀</button>
+              <button class="btn btn-primary">发送</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ Record ============ -->
+      <div class="page-section" id="page-record">
+        <div class="page-title">🎬 操作录制</div>
+        <div class="page-subtitle">在浏览器中录制操作步骤，自动生成可执行案例</div>
+        <div style="display:flex;gap:16px;height:calc(100vh - 200px)">
+          <div class="card" style="flex:1;display:flex;flex-direction:column;padding:0;overflow:hidden">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+              <span style="font-weight:600">🌐 浏览器预览</span>
+              <span style="margin-left:auto;font-size:13px;color:var(--text-secondary)">目标URL:</span>
+              <input class="search-input" style="width:400px" value="https://example.com/login">
+              <button class="btn btn-sm">访问</button>
+            </div>
+            <div style="flex:1;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative">
+              <div style="text-align:center;color:var(--text-secondary)">
+                <div style="font-size:64px;margin-bottom:16px">🖥</div>
+                <div style="font-size:16px;margin-bottom:8px">浏览器录制窗口</div>
+                <div style="font-size:13px">点击「开始录制」后，在此浏览器中操作</div>
+                <div style="margin-top:20px;padding:20px;background:var(--card-bg);border-radius:8px;border:1px solid var(--border);text-align:left;max-width:400px;margin-left:auto;margin-right:auto">
+                  <div style="font-weight:600;margin-bottom:8px">📝 模拟录制效果:</div>
+                  <div style="font-size:12px;color:var(--text-secondary);line-height:1.8">
+                    1. 用户在浏览器中操作 → 实时高亮元素<br>
+                    2. 右侧自动记录操作步骤<br>
+                    3. 每步自动截图<br>
+                    4. 停止后 AI 转译为自然语言
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="width:380px;flex-shrink:0;display:flex;flex-direction:column;gap:16px">
+            <div class="card" style="flex:1;overflow-y:auto">
+              <div class="card-title">📝 操作步骤 <span class="tag tag-running" style="margin-left:8px">● 录制中</span></div>
+              <table style="font-size:12px">
+                <thead><tr><th>#</th><th>时间</th><th>操作</th><th>目标</th><th>值</th></tr></thead>
+                <tbody>
+                  <tr><td>1</td><td>00:01</td><td>打开页面</td><td>/login</td><td>-</td></tr>
+                  <tr><td>2</td><td>00:03</td><td>点击</td><td>#username</td><td>-</td></tr>
+                  <tr><td>3</td><td>00:04</td><td>输入</td><td>#username</td><td>admin</td></tr>
+                  <tr><td>4</td><td>00:06</td><td>输入</td><td>#password</td><td>****</td></tr>
+                  <tr><td>5</td><td>00:08</td><td>点击</td><td>.login-btn</td><td>-</td></tr>
+                  <tr><td>6</td><td>00:10</td><td>断言</td><td>.home-page</td><td>可见</td></tr>
+                </tbody>
+              </table>
+              <div style="margin-top:12px;font-size:12px;color:var(--text-secondary)">操作数: 6 &nbsp; ⏱ 00:12</div>
+            </div>
+            <div class="card">
+              <div style="display:flex;gap:8px;justify-content:center;margin-bottom:12px">
+                <button class="btn btn-sm">⏸ 暂停</button>
+                <button class="btn btn-sm btn-danger">⏹ 停止</button>
+                <button class="btn btn-sm">📷 截图</button>
+              </div>
+              <button class="btn btn-primary" style="width:100%;margin-bottom:8px">🔄 AI 生成案例</button>
+              <button class="btn" style="width:100%">💻 预览 Playwright 脚本</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ Settings ============ -->
+      <div class="page-section" id="page-settings">
+        <div class="page-title">系统管理</div>
+        <div class="page-subtitle">管理系统、用户、角色和平台配置</div>
+        <div style="display:flex;gap:16px">
+          <div class="card" style="width:200px;flex-shrink:0">
+            <div style="padding:10px;cursor:pointer;border-radius:6px;background:rgba(64,158,255,0.08);font-weight:600;color:var(--primary);margin-bottom:4px">📋 被管系统</div>
+            <div style="padding:10px;cursor:pointer;border-radius:6px;margin-bottom:4px">👥 用户管理</div>
+            <div style="padding:10px;cursor:pointer;border-radius:6px;margin-bottom:4px">🔑 角色权限</div>
+            <div style="padding:10px;cursor:pointer;border-radius:6px">⚙️ 系统配置</div>
+          </div>
+          <div style="flex:1">
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                <div class="card-title" style="margin:0">被管系统</div>
+                <button class="btn btn-primary btn-sm">+ 注册系统</button>
+              </div>
+              <table>
+                <thead><tr><th>系统编码</th><th>系统名称</th><th>类型</th><th>基础URL</th><th>案例数</th><th>状态</th><th>操作</th></tr></thead>
+                <tbody>
+                  <tr><td>ORDER</td><td>订单系统</td><td><span class="tag tag-pc">🖥 WEB</span></td><td>https://order.xxx.com</td><td>456</td><td><span class="tag tag-success">✅</span></td><td><button class="btn-text">编辑</button></td></tr>
+                  <tr><td>PAY</td><td>支付系统</td><td><span class="tag tag-pc">🖥 WEB</span></td><td>https://pay.xxx.com</td><td>234</td><td><span class="tag tag-success">✅</span></td><td><button class="btn-text">编辑</button></td></tr>
+                  <tr><td>USER</td><td>用户系统</td><td><span class="tag tag-pc">🖥 WEB</span></td><td>https://user.xxx.com</td><td>312</td><td><span class="tag tag-success">✅</span></td><td><button class="btn-text">编辑</button></td></tr>
+                  <tr><td>INV</td><td>库存系统</td><td><span class="tag tag-pc">🖥 WEB</span></td><td>https://inv.xxx.com</td><td>128</td><td><span class="tag tag-draft">⏸ 暂停</span></td><td><button class="btn-text">编辑</button></td></tr>
+                  <tr><td>APP-ORD</td><td>订单APP</td><td><span class="tag tag-app">📱 APP</span></td><td>-</td><td>89</td><td><span class="tag tag-success">✅</span></td><td><button class="btn-text">编辑</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="card-title">⚙️ 系统配置</div>
+              <div style="display:flex;gap:8px;margin-bottom:16px">
+                <button class="btn btn-sm btn-primary">🤖 LLM配置</button>
+                <button class="btn btn-sm">📧 通知配置</button>
+                <button class="btn btn-sm">🎬 Playwright</button>
+                <button class="btn btn-sm">💾 存储</button>
+                <button class="btn btn-sm">🔐 安全</button>
+              </div>
+              <div style="background:var(--bg);border-radius:8px;padding:16px">
+                <div style="font-weight:600;margin-bottom:12px">🤖 LLM 模型配置</div>
+                <div style="margin-bottom:12px">
+                  <span style="font-size:13px;color:var(--text-secondary)">默认模型:</span>
+                  <select class="select-input" style="margin-left:8px"><option>通义千问 qwen-max</option><option>GPT-4o</option><option>Claude 3.5</option></select>
+                </div>
+                <div style="background:var(--card-bg);border-radius:6px;padding:12px;border:1px solid var(--border);margin-bottom:8px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>通义千问 qwen-max</b> <button class="btn btn-sm">测试连接</button></div>
+                  <div style="font-size:12px;color:var(--text-secondary)">API Key: sk-******************* &nbsp;|&nbsp; 用途: ☑案例生成 ☑需求分析 ☑意图识别 ☑缺陷分析</div>
+                </div>
+                <div style="background:var(--card-bg);border-radius:6px;padding:12px;border:1px solid var(--border)">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>GPT-4o</b> <button class="btn btn-sm">测试连接</button></div>
+                  <div style="font-size:12px;color:var(--text-secondary)">API Key: sk-******************* &nbsp;|&nbsp; 用途: ☑案例生成 ☑意图识别</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Video Player Modal -->
+<div class="video-modal" id="videoModal">
+  <div class="video-modal-content">
+    <div class="video-modal-header">
+      <div>
+        <b id="videoModalTitle">视频回放</b>
+        <span style="font-size:12px;color:var(--text-secondary);margin-left:8px" id="videoModalDuration"></span>
+      </div>
+      <button class="btn btn-sm" onclick="closeVideoModal()">✕ 关闭</button>
+    </div>
+    <div class="video-modal-body">
+      <div style="font-size:60px;cursor:pointer" id="videoPlayBtn">▶</div>
+      <div style="font-size:14px" id="videoModalDesc">点击播放</div>
+      <div style="position:absolute;top:12px;left:12px;display:flex;gap:6px">
+        <span class="tag" style="background:rgba(64,158,255,0.9);color:#fff">🎬 执行录制</span>
+        <span class="tag tag-success">✅ 通过</span>
+      </div>
+    </div>
+    <div class="video-controls">
+      <button class="btn btn-sm">⏮</button>
+      <button class="btn btn-sm btn-primary" id="videoPlayPauseBtn">▶</button>
+      <button class="btn btn-sm">⏭</button>
+      <div class="video-progress"><div class="video-progress-fill"></div></div>
+      <span class="video-time">00:00 / <span id="videoModalTime">00:12</span></span>
+      <button class="btn btn-sm" title="逐帧">🔍</button>
+      <button class="btn btn-sm" title="下载">⏬</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showPage(name) {
+  document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+  const page = document.getElementById('page-' + name);
+  if (page) page.classList.add('active');
+  document.querySelectorAll('.sidebar .menu-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.page-nav a').forEach(el => el.classList.remove('active'));
+  const names = {dashboard:'首页概览',cases:'案例管理',suites:'案例集执行',execution:'执行详情',knowledge:'知识库',defects:'缺陷库',skills:'SKILL管理',chat:'AI对话',record:'操作录制',settings:'系统管理'};
+  document.getElementById('breadcrumb-current').textContent = names[name] || name;
+  const menuItems = document.querySelectorAll('.sidebar .menu-item');
+  const menuMap = {dashboard:0,cases:1,suites:2,execution:3,knowledge:4,defects:5,skills:6,chat:7,record:8,settings:9};
+  if (menuMap[name] !== undefined && menuItems[menuMap[name]]) menuItems[menuMap[name]].classList.add('active');
+  document.querySelectorAll('.page-nav a').forEach(a => { if (a.getAttribute('onclick')?.includes(name)) a.classList.add('active'); });
+}
+
+function toggleTheme() {
+  document.body.classList.toggle('dark');
+  const isDark = document.body.classList.contains('dark');
+  document.getElementById('themeBtn').textContent = isDark ? '☀️ 亮色' : '🌙 暗色';
+}
+
+function switchKbTab(el, tabId) {
+  el.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['kb-docs','kb-videos','kb-search'].forEach(id => {
+    const tab = document.getElementById(id);
+    if (tab) tab.style.display = id === tabId ? 'block' : 'none';
+  });
+}
+
+function switchExecTab(el, tabId) {
+  el.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['exec-steps','exec-report','exec-logs','exec-compare','exec-video','exec-ai'].forEach(id => {
+    const tab = document.getElementById(id);
+    if (tab) tab.style.display = id === tabId ? 'block' : 'none';
+  });
+}
+
+function toggleCaseLog(header) {
+  const body = header.nextElementSibling;
+  body.classList.toggle('open');
+  const arrow = header.querySelector('span:last-child');
+  if (arrow) arrow.textContent = body.classList.contains('open') ? '▼' : '▶';
+}
+
+function openVideoModal(title, duration) {
+  document.getElementById('videoModal').classList.add('show');
+  document.getElementById('videoModalTitle').textContent = title;
+  document.getElementById('videoModalDuration').textContent = duration;
+  document.getElementById('videoModalTime').textContent = duration;
+  document.getElementById('videoModalDesc').textContent = title + ' — 点击播放';
+}
+
+function closeVideoModal() {
+  document.getElementById('videoModal').classList.remove('show');
+}
+
+// Close modal on background click
+document.getElementById('videoModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeVideoModal();
+});
+</script>
+</body>
+</html>

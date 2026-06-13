@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: aitest-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: aitest123
+      MYSQL_DATABASE: ai_test_platform
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+      TZ: Asia/Shanghai
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docs/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - aitest-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: aitest-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass aitest123
+    volumes:
+      - redis_data:/data
+    networks:
+      - aitest-net
+
+  minio:
+    image: minio/minio:latest
+    container_name: aitest-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: aitest
+      MINIO_ROOT_PASSWORD: aitest123
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - aitest-net
+
+volumes:
+  mysql_data:
+  redis_data:
+  minio_data:
+
+networks:
+  aitest-net:
+    driver: bridge

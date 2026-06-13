@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>AI测试平台 - 功能测试报告</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f7fa; color: #333; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; text-align: center; }
+    .header h1 { font-size: 28px; margin-bottom: 8px; }
+    .header p { opacity: 0.9; font-size: 14px; }
+    .summary { display: flex; gap: 20px; padding: 30px 40px; margin: -20px 40px 0; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: relative; z-index: 1; }
+    .summary-card { flex: 1; text-align: center; padding: 20px; border-radius: 8px; }
+    .summary-card.total { background: #f0f5ff; }
+    .summary-card.pass { background: #f6ffed; }
+    .summary-card.fail { background: #fff2f0; }
+    .summary-card.skip { background: #fffbe6; }
+    .summary-card .number { font-size: 36px; font-weight: 700; }
+    .summary-card.total .number { color: #1890ff; }
+    .summary-card.pass .number { color: #52c41a; }
+    .summary-card.fail .number { color: #ff4d4f; }
+    .summary-card.skip .number { color: #faad14; }
+    .summary-card .label { font-size: 14px; color: #666; margin-top: 4px; }
+    .content { padding: 30px 40px; }
+    .progress-bar { height: 8px; background: #f0f0f0; border-radius: 4px; margin: 20px 0; overflow: hidden; }
+    .progress-bar .fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #52c41a, #73d13d); }
+    .module-section { margin-bottom: 24px; }
+    .module-title { font-size: 18px; font-weight: 600; margin-bottom: 12px; padding: 10px 16px; background: white; border-radius: 8px; border-left: 4px solid #667eea; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    th { background: #fafafa; padding: 12px 16px; text-align: left; font-weight: 600; font-size: 13px; color: #666; border-bottom: 1px solid #f0f0f0; }
+    td { padding: 10px 16px; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
+    tr:hover { background: #fafafa; }
+    .status { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+    .status.PASS { background: #f6ffed; color: #52c41a; }
+    .status.FAIL { background: #fff2f0; color: #ff4d4f; }
+    .status.SKIP { background: #fffbe6; color: #faad14; }
+    .error-msg { color: #ff4d4f; font-size: 12px; margin-top: 4px; }
+    .footer { text-align: center; padding: 30px; color: #999; font-size: 12px; }
+    .env-info { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+    .env-info h3 { margin-bottom: 12px; font-size: 16px; }
+    .env-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .env-item { padding: 8px 12px; background: #fafafa; border-radius: 6px; }
+    .env-item .label { font-size: 12px; color: #999; }
+    .env-item .value { font-size: 14px; font-weight: 500; margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🧪 AI 全链路自动化测试平台 - 功能测试报告</h1>
+    <p>Generated at 2026/6/13 17:21:16 | Profile: test (H2 in-memory)</p>
+  </div>
+
+  <div class="summary">
+    <div class="summary-card total">
+      <div class="number">48</div>
+      <div class="label">总测试数</div>
+    </div>
+    <div class="summary-card pass">
+      <div class="number">48</div>
+      <div class="label">通过 ✅</div>
+    </div>
+    <div class="summary-card fail">
+      <div class="number">0</div>
+      <div class="label">失败 ❌</div>
+    </div>
+    <div class="summary-card skip">
+      <div class="number">1</div>
+      <div class="label">跳过 ⏭️</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="progress-bar">
+      <div class="fill" style="width: 100.0%"></div>
+    </div>
+    <p style="text-align:center; color:#666; margin-bottom:24px;">
+      通过率: <strong>100.0%</strong> (48/48)
+    </p>
+
+    <div class="env-info">
+      <h3>📌 测试环境</h3>
+      <div class="env-grid">
+        <div class="env-item"><div class="label">后端框架</div><div class="value">Spring Boot 3.2</div></div>
+        <div class="env-item"><div class="label">数据库</div><div class="value">H2 (内存模式)</div></div>
+        <div class="env-item"><div class="label">Java 版本</div><div class="value">OpenJDK 17</div></div>
+        <div class="env-item"><div class="label">测试端口</div><div class="value">8080</div></div>
+        <div class="env-item"><div class="label">Profile</div><div class="value">test</div></div>
+        <div class="env-item"><div class="label">测试时间</div><div class="value">2026/6/13</div></div>
+        <div class="env-item"><div class="label">测试模块</div><div class="value">15 个</div></div>
+        <div class="env-item"><div class="label">API 基础路径</div><div class="value">/api</div></div>
+      </div>
+    </div>
+
+    
+    <div class="module-section">
+      <div class="module-title">
+        认证 <span style="float:right; font-size:13px; color:#666;">3/3 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>登录接口 - 正常登录</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>登录接口 - 错误密码</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>获取当前用户信息</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="module-section">
+      <div class="module-title">
+        系统管理 <span style="float:right; font-size:13px; color:#666;">3/3 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>查询系统列表</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>创建新系统</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>获取所有系统(下拉)</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="module-section">
+      <div class="module-title">
+        用户管理 <span style="float:right; font-size:13px; color:#666;">2/2 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>查询用户列表</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>创建新用户</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="module-section">
+      <div class="module-title">
+        案例管理 <span style="float:right; font-size:13px; color:#666;">5/5 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>创建PC案例</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>创建API案例</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>查询案例列表</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>获取案例详情</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>更新案例</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="module-section">
+      <div class="module-title">
+        案例集 <span style="float:right; font-size:13px; color:#666;">3/3 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>创建案例集</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>查询案例集列表</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>执行案例集</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="module-section">
+      <div class="module-title">
+        执行记录 <span style="float:right; font-size:13px; color:#666;">1/1 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>查询执行列表</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="module-section">
+      <div class="module-title">
+        知识库 <span style="float:right; font-size:13px; color:#666;">5/5 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>查询分类列表</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>创建新分类</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>查询文档列表</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>查询视频列表</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>知识库搜索</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="module-section">
+      <div class="module-title">
+        SKILL <span style="float:right; font-size:13px; color:#666;">5/5 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>查询SKILL列表</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>获取活跃SKILL</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>意图匹配</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>创建自定义SKILL</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>调用SKILL</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="module-section">
+      <div class="module-title">
+        经验库 <span style="float:right; font-size:13px; color:#666;">1/1 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>查询经验列表</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="module-section">
+      <div class="module-title">
+        LLM <span style="float:right; font-size:13px; color:#666;">5/5 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>创建会话</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>查询会话列表</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>发送消息(通用对话)</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>发送消息(SKILL调用)</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>获取会话详情(含消息)</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="module-section">
+      <div class="module-title">
+        缺陷 <span style="float:right; font-size:13px; color:#666;">4/4 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>创建缺陷</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>查询缺陷列表</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>更新缺陷状态</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>获取缺陷统计</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="module-section">
+      <div class="module-title">
+        风险分析 <span style="float:right; font-size:13px; color:#666;">2/2 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>创建风险分析</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>查询风险分析列表</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="module-section">
+      <div class="module-title">
+        录制 <span style="float:right; font-size:13px; color:#666;">4/4 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>开始录制</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>查询录制列表</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>停止录制</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>生成案例</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="module-section">
+      <div class="module-title">
+        需求分析 <span style="float:right; font-size:13px; color:#666;">1/2 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>创建文档(模拟)</td>
+            <td><span class="status SKIP">⏭️ 跳过</span></td>
+            <td><span class="error-msg">Need multipart upload</span></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>创建知识库文档(模拟)</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="module-section">
+      <div class="module-title">
+        配置 <span style="float:right; font-size:13px; color:#666;">4/4 通过</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th style="width:40px">#</th><th>测试用例</th><th style="width:80px">状态</th><th>备注</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>1</td>
+            <td>查询全部配置(按分类)</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>查询LLM分类配置</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>获取单个配置值</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>更新配置值</td>
+            <td><span class="status PASS">✅ 通过</span></td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>AI 全链路自动化测试平台 v1.0 | 自动化测试报告 | 2026</p>
+  </div>
+</body>
+</html>

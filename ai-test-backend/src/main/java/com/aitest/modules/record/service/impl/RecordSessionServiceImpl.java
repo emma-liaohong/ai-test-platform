@@ -11,6 +11,7 @@ import com.aitest.modules.record.service.RecordSessionService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class RecordSessionServiceImpl extends ServiceImpl<RecordSessionMapper, RecordSession>
         implements RecordSessionService {
+
+    private final ObjectMapper objectMapper;
 
     @Override
     public PageResult<RecordSession> listSessions(RecordSessionQueryDTO query) {
@@ -163,6 +166,16 @@ public class RecordSessionServiceImpl extends ServiceImpl<RecordSessionMapper, R
             throw new BusinessException(400, "会话没有录制步骤，无法生成用例");
         }
 
+        // Convert LinkedHashMap to RecordStepDTO (JacksonTypeHandler loses generic type info)
+        List<RecordStepDTO> typedSteps = new ArrayList<>();
+        for (Object step : session.getSteps()) {
+            if (step instanceof RecordStepDTO) {
+                typedSteps.add((RecordStepDTO) step);
+            } else {
+                typedSteps.add(objectMapper.convertValue(step, RecordStepDTO.class));
+            }
+        }
+
         // 更新状态为已生成
         long mockCaseId = 10000 + new Random().nextInt(90000);
         session.setStatus("GENERATED");
@@ -171,15 +184,14 @@ public class RecordSessionServiceImpl extends ServiceImpl<RecordSessionMapper, R
 
         // 构建自然语言步骤描述
         List<String> stepDescriptions = new ArrayList<>();
-        List<RecordStepDTO> steps = session.getSteps();
-        for (RecordStepDTO step : steps) {
+        for (RecordStepDTO step : typedSteps) {
             String desc = String.format("步骤%d: %s", step.getStepOrder(),
                     StringUtils.hasText(step.getDescription()) ? step.getDescription() : step.getAction() + " " + step.getTarget());
             stepDescriptions.add(desc);
         }
 
         // 生成模拟 Playwright 脚本
-        String playwrightScript = generateMockPlaywrightScript(session, steps);
+        String playwrightScript = generateMockPlaywrightScript(session, typedSteps);
 
         // 构建返回结果
         Map<String, Object> result = new LinkedHashMap<>();

@@ -40,7 +40,7 @@ public class AiExperienceServiceImpl extends ServiceImpl<AiExperienceMapper, AiE
 
         LambdaQueryWrapper<AiExperience> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(StringUtils.hasText(query.getExperienceType()), AiExperience::getExperienceType, query.getExperienceType())
-                .eq(query.getIsPromoted() != null, AiExperience::getIsPromoted, query.getIsPromoted() ? 1 : 0)
+                .eq(query.getIsPromoted() != null, AiExperience::getIsPromoted, Boolean.TRUE.equals(query.getIsPromoted()) ? 1 : 0)
                 .and(StringUtils.hasText(query.getKeyword()), w ->
                         w.like(AiExperience::getTitle, query.getKeyword())
                                 .or()

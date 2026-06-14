@@ -32,6 +32,10 @@ public class TestCase implements Serializable {
     @Schema(description = "Associated system ID")
     private Long systemId;
 
+    @Schema(description = "Associated system name (denormalized, not in DB)")
+    @TableField(exist = false)
+    private String systemName;
+
     @Schema(description = "Module path (e.g. /login/auth)")
     private String modulePath;
 

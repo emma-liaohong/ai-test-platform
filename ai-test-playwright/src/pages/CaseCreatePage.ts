@@ -44,6 +44,15 @@ export class CaseCreatePage {
     await this.caseNameInput.fill(name);
   }
 
+  /**
+   * Select a system from the dropdown by name.
+   */
+  async selectSystem(systemName: string) {
+    await this.systemSelect.click();
+    // Wait for dropdown to appear and select the option
+    await this.page.locator('.el-select-dropdown').locator('.el-select-dropdown__item').filter({ hasText: systemName }).click();
+  }
+
   async save() {
     await this.saveButton.click();
   }

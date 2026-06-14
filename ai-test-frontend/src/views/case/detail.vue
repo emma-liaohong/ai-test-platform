@@ -455,7 +455,7 @@ const moduleOptions = [
 const testCase = reactive<TestCase>({
   caseName: '',
   caseType: 'PC',
-  systemId: null,
+  systemId: null as any,
   modulePath: [],
   priority: 'P2',
   caseLevel: '',

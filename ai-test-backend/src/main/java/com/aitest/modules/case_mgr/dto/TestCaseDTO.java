@@ -28,6 +28,7 @@ public class TestCaseDTO implements Serializable {
     @Schema(description = "Case type: PC, APP, API")
     private String caseType;
 
+    @NotNull(message = "System ID is required")
     @Schema(description = "Associated system ID")
     private Long systemId;
 

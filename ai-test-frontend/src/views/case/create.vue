@@ -69,7 +69,13 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="所属系统" prop="systemId">
-                <el-select v-model="form.systemId" placeholder="请选择所属系统" filterable clearable style="width: 100%">
+                <el-select v-model="form.systemId" placeholder="请选择所属系统" filterable style="width: 100%">
+                  <template v-if="systemOptions.length === 0" #empty>
+                    <div style="padding: 12px; text-align: center; color: #909399;">
+                      <p>暂无系统，请先创建系统</p>
+                      <el-button type="primary" size="small" @click="goToSystemPage">去创建系统</el-button>
+                    </div>
+                  </template>
                   <el-option
                     v-for="sys in systemOptions"
                     :key="sys.id"
@@ -423,7 +429,7 @@ const moduleOptions = [
 const form = reactive<TestCase>({
   caseName: '',
   caseType: 'PC',
-  systemId: null,
+  systemId: null as any,
   modulePath: [],
   priority: 'P2',
   caseLevel: '',
@@ -444,6 +450,7 @@ const form = reactive<TestCase>({
 
 const formRules = reactive<FormRules>({
   caseName: [{ required: true, message: '请输入用例名称', trigger: 'blur' }],
+  systemId: [{ required: true, message: '请选择所属系统', trigger: 'change' }],
   priority: [{ required: true, message: '请选择优先级', trigger: 'change' }],
 })
 
@@ -470,6 +477,10 @@ function confirmType() {
 
 function goBack() {
   router.push('/cases')
+}
+
+function goToSystemPage() {
+  router.push('/systems')
 }
 
 async function handleSave() {

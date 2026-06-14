@@ -9,6 +9,8 @@ import com.aitest.modules.case_mgr.entity.TestCaseStep;
 import com.aitest.modules.case_mgr.mapper.TestCaseMapper;
 import com.aitest.modules.case_mgr.mapper.TestCaseStepMapper;
 import com.aitest.modules.case_mgr.service.TestCaseService;
+import com.aitest.modules.system.entity.SysSystem;
+import com.aitest.modules.system.service.SysSystemService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -22,6 +24,7 @@ import org.springframework.util.StringUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * TestCase Service implementation
@@ -32,10 +35,17 @@ import java.util.Map;
 public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> implements TestCaseService {
 
     private final TestCaseStepMapper testCaseStepMapper;
+    private final SysSystemService sysSystemService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public TestCase createCase(TestCaseDTO dto) {
+        // Validate system exists
+        SysSystem system = sysSystemService.getById(dto.getSystemId());
+        if (system == null) {
+            throw new BusinessException(400, "System not found: " + dto.getSystemId());
+        }
+
         // Check if case code already exists
         LambdaQueryWrapper<TestCase> codeWrapper = new LambdaQueryWrapper<>();
         codeWrapper.eq(TestCase::getCaseCode, dto.getCaseCode());
@@ -49,6 +59,7 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
         testCase.setCaseName(dto.getCaseName());
         testCase.setCaseType(dto.getCaseType());
         testCase.setSystemId(dto.getSystemId());
+        testCase.setSystemName(system.getName());
         testCase.setModulePath(dto.getModulePath());
         testCase.setPriority(dto.getPriority());
         testCase.setCaseLevel(dto.getCaseLevel());
@@ -87,6 +98,15 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
             throw new BusinessException(404, "Test case not found: " + id);
         }
 
+        // Validate system exists if systemId changed
+        SysSystem system = null;
+        if (dto.getSystemId() != null && !dto.getSystemId().equals(existing.getSystemId())) {
+            system = sysSystemService.getById(dto.getSystemId());
+            if (system == null) {
+                throw new BusinessException(400, "System not found: " + dto.getSystemId());
+            }
+        }
+
         // Check case code uniqueness (exclude self)
         if (StringUtils.hasText(dto.getCaseCode()) && !dto.getCaseCode().equals(existing.getCaseCode())) {
             LambdaQueryWrapper<TestCase> codeWrapper = new LambdaQueryWrapper<>();
@@ -103,6 +123,9 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
         testCase.setCaseName(dto.getCaseName());
         testCase.setCaseType(dto.getCaseType());
         testCase.setSystemId(dto.getSystemId());
+        if (system != null) {
+            testCase.setSystemName(system.getName());
+        }
         testCase.setModulePath(dto.getModulePath());
         testCase.setPriority(dto.getPriority());
         testCase.setCaseLevel(dto.getCaseLevel());
@@ -140,6 +163,14 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
             throw new BusinessException(404, "Test case not found: " + id);
         }
 
+        // Populate systemName
+        if (testCase.getSystemId() != null) {
+            SysSystem system = sysSystemService.getById(testCase.getSystemId());
+            if (system != null) {
+                testCase.setSystemName(system.getName());
+            }
+        }
+
         List<TestCaseStep> steps = testCaseStepMapper.selectList(
                 new LambdaQueryWrapper<TestCaseStep>()
                         .eq(TestCaseStep::getCaseId, id)
@@ -167,9 +198,33 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
                .orderByDesc(TestCase::getCreatedAt);
 
         Page<TestCase> result = page(page, wrapper);
+
+        // Populate systemName for each case
+        List<TestCase> records = result.getRecords();
+        if (!records.isEmpty()) {
+            // Collect unique system IDs and batch fetch
+            List<Long> systemIds = records.stream()
+                    .map(TestCase::getSystemId)
+                    .filter(java.util.Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors.toList());
+            if (!systemIds.isEmpty()) {
+                List<SysSystem> systems = sysSystemService.listByIds(systemIds);
+                Map<Long, String> systemNameMap = new HashMap<>();
+                for (SysSystem s : systems) {
+                    systemNameMap.put(s.getId(), s.getName());
+                }
+                for (TestCase tc : records) {
+                    if (tc.getSystemId() != null) {
+                        tc.setSystemName(systemNameMap.get(tc.getSystemId()));
+                    }
+                }
+            }
+        }
+
         return PageResult.of(
                 result.getTotal(), result.getCurrent(), result.getSize(),
-                result.getPages(), result.getRecords());
+                result.getPages(), records);
     }
 
     @Override

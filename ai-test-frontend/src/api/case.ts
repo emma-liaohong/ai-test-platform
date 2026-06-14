@@ -76,7 +76,7 @@ export interface TestCase {
   caseCode?: string
   caseName: string
   caseType: CaseType
-  systemId?: number | null
+  systemId: number
   systemName?: string
   modulePath?: string[]
   priority: Priority

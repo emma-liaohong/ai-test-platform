@@ -6,6 +6,7 @@ import com.aitest.common.result.Result;
 import com.aitest.modules.case_mgr.dto.TestCaseDTO;
 import com.aitest.modules.case_mgr.dto.TestCaseQueryDTO;
 import com.aitest.modules.case_mgr.entity.TestCase;
+import com.aitest.modules.case_mgr.service.PlaywrightExecutionService;
 import com.aitest.modules.case_mgr.service.TestCaseService;
 import com.aitest.modules.case_suite.entity.TestExecution;
 import com.aitest.modules.case_suite.entity.TestExecutionDetail;
@@ -35,6 +36,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class TestCaseController {
 
     private final TestCaseService testCaseService;
+    private final PlaywrightExecutionService playwrightExecutionService;
     private final TestExecutionMapper testExecutionMapper;
     private final TestExecutionDetailMapper testExecutionDetailMapper;
 
@@ -84,7 +86,7 @@ public class TestCaseController {
     }
 
     @PostMapping("/{id}/execute")
-    @Operation(summary = "Execute a single test case", description = "Execute a test case and create execution record")
+    @Operation(summary = "Execute a test case", description = "Execute a test case. PC cases use LLM + Playwright headed mode; others are simulated.")
     public Result<TestExecution> execute(
             @Parameter(description = "Case ID") @PathVariable Long id) {
         TestCase testCase = testCaseService.getById(id);
@@ -105,10 +107,23 @@ public class TestCaseController {
         execution.setStartedAt(LocalDateTime.now());
         testExecutionMapper.insert(execution);
 
-        // Simulate execution
+        if ("PC".equalsIgnoreCase(testCase.getCaseType())) {
+            // PC case: use LLM + Playwright headed execution (async)
+            log.info("PC case execution via LLM + Playwright: {}", testCase.getCaseCode());
+            playwrightExecutionService.executeAsync(testCase, execution);
+            // Return immediately - execution runs in background
+        } else {
+            // Non-PC cases: simulate execution
+            simulateExecution(testCase, execution);
+        }
+
+        return Result.success(execution);
+    }
+
+    private void simulateExecution(TestCase testCase, TestExecution execution) {
         TestExecutionDetail detail = new TestExecutionDetail();
         detail.setExecutionId(execution.getId());
-        detail.setCaseId(id);
+        detail.setCaseId(testCase.getId());
         detail.setStartedAt(LocalDateTime.now());
 
         ThreadLocalRandom random = ThreadLocalRandom.current();
@@ -132,8 +147,5 @@ public class TestCaseController {
         execution.setStatus(detail.getStatus());
         execution.setFinishedAt(detail.getFinishedAt());
         testExecutionMapper.updateById(execution);
-
-        log.info("Test case executed: {} ({}) - {}", testCase.getCaseCode(), testCase.getCaseName(), detail.getStatus());
-        return Result.success(execution);
     }
 }

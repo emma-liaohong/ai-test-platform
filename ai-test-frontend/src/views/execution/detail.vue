@@ -548,7 +548,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -556,6 +556,7 @@ import {
   RemoveFilled, Document, VideoCamera, Timer, TrendCharts, MagicStick, Download, Share,
   CopyDocument, WarningFilled, Check, ChatLineRound,
 } from '@element-plus/icons-vue'
+import { getExecutionDetail as fetchExecutionDetail } from '@/api/suite'
 import type {
   TestExecution,
   TestExecutionDetail,
@@ -637,10 +638,89 @@ const aiAnalysis = reactive({
 })
 
 onMounted(() => {
-  loadMockData()
+  loadExecutionData()
+  // Poll every 3 seconds if execution is running
+  pollTimer = setInterval(() => {
+    const s = (execution.status || '').toLowerCase()
+    if (s === 'running') {
+      loadExecutionData()
+    }
+  }, 3000)
 })
 
-// ========== Mock Data ==========
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer)
+})
+
+let pollTimer: ReturnType<typeof setInterval> | null = null
+
+async function loadExecutionData() {
+  try {
+    const res: any = await fetchExecutionDetail(executionId.value)
+    const data = res.data || res
+    const exec = data.execution || data
+    const details = data.details || []
+
+    // Map backend fields to frontend display fields
+    Object.assign(execution, {
+      executionName: exec.executionName || '',
+      suiteName: '',
+      systemName: '',
+      triggerType: (exec.triggerType || 'manual').toLowerCase(),
+      status: (exec.status || 'pending').toLowerCase(),
+      totalCases: exec.totalCount || exec.totalCases || 0,
+      passedCases: exec.passedCount || exec.passedCases || 0,
+      failedCases: exec.failedCount || exec.failedCases || 0,
+      skippedCases: exec.skippedCount || exec.skippedCases || 0,
+      passRate: exec.totalCount > 0 ? Math.round((exec.passedCount / exec.totalCount) * 100) : 0,
+      startedAt: exec.startedAt || '',
+      finishedAt: exec.finishedAt || '',
+      duration: exec.finishedAt && exec.startedAt
+        ? Math.round((new Date(exec.finishedAt).getTime() - new Date(exec.startedAt).getTime()) / 1000)
+        : 0,
+      durationText: formatDuration(exec.startedAt, exec.finishedAt),
+      executedBy: '',
+    })
+
+    // Map case details
+    caseDetails.value = details.map((d: any) => ({
+      caseId: d.caseId,
+      caseName: `Case #${d.caseId}`,
+      caseType: 'PC',
+      priority: 'P1',
+      status: (d.status || 'pending').toLowerCase() === 'success' ? 'passed' : (d.status || 'pending').toLowerCase(),
+      duration: d.durationMs || 0,
+      durationText: d.durationMs ? `${(d.durationMs / 1000).toFixed(1)}s` : '-',
+      hasVideo: false,
+      steps: d.executionLog ? [{
+        stepOrder: 1,
+        stepAction: 'execute',
+        stepDescription: d.executionLog || '执行完成',
+        status: d.status === 'SUCCESS' ? 'passed' : 'failed',
+        duration: d.durationMs || 0,
+        errorMessage: d.errorMessage || undefined,
+        timestamp: d.startedAt || '',
+      }] : [],
+      errorMessage: d.errorMessage || undefined,
+      executionLog: d.executionLog || '',
+    }))
+  } catch (e) {
+    console.error('Failed to load execution data:', e)
+  }
+}
+
+function formatDuration(start: string, end: string): string {
+  if (!start || !end) return '-'
+  const ms = new Date(end).getTime() - new Date(start).getTime()
+  if (ms < 1000) return `${ms}ms`
+  const seconds = Math.round(ms / 1000)
+  if (seconds < 60) return `${seconds}s`
+  const minutes = Math.floor(seconds / 60)
+  const remainSec = seconds % 60
+  return `${minutes}m ${remainSec}s`
+}
+
+// ========== Mock Data (kept as fallback) ==========
 function loadMockData() {
   // Execution overview
   Object.assign(execution, {
@@ -960,7 +1040,7 @@ function handleCancel() {
 }
 
 function handleRefresh() {
-  loadMockData()
+  loadExecutionData()
   ElMessage.success('数据已刷新')
 }
 

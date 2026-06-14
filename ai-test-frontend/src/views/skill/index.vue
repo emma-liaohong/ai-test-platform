@@ -766,7 +766,7 @@ async function fetchData() {
     if (queryParams.status) params.status = queryParams.status
 
     const res: any = await getSkillList(params)
-    skillList.value = res.data?.list || res.list || []
+    skillList.value = res.data?.records || res.data?.list || []
     pagination.total = res.data?.total || res.total || 0
 
     // Generate mock stats
@@ -795,7 +795,7 @@ async function fetchExecutionLogs(skillId: number) {
   logsLoading.value = true
   try {
     const res: any = await getSkillLogs(skillId, { page: 1, size: 20 })
-    executionLogs.value = res.data?.list || res.list || []
+    executionLogs.value = res.data?.records || res.data?.list || []
   } catch {
     // Fallback to mock logs
     executionLogs.value = generateMockLogs(skillId)

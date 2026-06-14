@@ -14,5 +14,5 @@ export function logoutApi() {
 }
 
 export function getUserInfoApi() {
-  return request.get('/auth/userinfo')
+  return request.get('/auth/info')
 }

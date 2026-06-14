@@ -278,8 +278,8 @@ async function fetchSuiteCases() {
 async function fetchExecutionHistory() {
   historyLoading.value = true
   try {
-    const res: any = await getExecutionList({ suiteId: suiteId.value, pageSize: 20 })
-    executionHistory.value = res.data?.list || res.list || []
+    const res: any = await getExecutionList({ suiteId: suiteId.value, size: 20 })
+    executionHistory.value = res.data?.records || res.data?.list || []
   } catch {
     // handled by interceptor
   } finally {
@@ -291,10 +291,10 @@ async function filterAvailableCases() {
   // Re-fetch available cases with keyword filter
   try {
     const res: any = await getCaseList({
-      pageSize: 100,
+      size: 100,
       keyword: caseSearchKeyword.value || undefined,
     })
-    const allCases: TestCase[] = res.data?.list || res.list || []
+    const allCases: TestCase[] = res.data?.records || res.data?.list || []
     const existingIds = new Set(suiteCases.value.map(c => c.caseId))
     availableCases.value = allCases.filter(c => !existingIds.has(c.id!))
   } catch {

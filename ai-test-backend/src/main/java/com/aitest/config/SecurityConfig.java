@@ -1,7 +1,10 @@
 package com.aitest.config;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -12,20 +15,23 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * Spring Security configuration.
- * Currently permits all requests for development.
- * JWT authentication filter will be added later.
+ * Spring Security configuration with JWT authentication
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@Slf4j
 public class SecurityConfig {
 
+    @Lazy
+    @Autowired
+    private JwtAuthFilter jwtAuthFilter;
+
     /**
-     * Security filter chain - permits all requests for now.
-     * TODO: Add JWT authentication filter
+     * Security filter chain with JWT authentication
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -40,13 +46,16 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/favicon.ico"
+                                "/favicon.ico",
+                                "/h2-console/**"
                         ).permitAll()
-                        // Permit auth endpoints
-                        .requestMatchers("/api/auth/**").permitAll()
-                        // All other requests require authentication (enable after JWT filter is ready)
-                        .anyRequest().permitAll()
+                        // Permit auth endpoints (login/logout only, not /info)
+                        .requestMatchers("/api/auth/login", "/api/auth/logout").permitAll()
+                        // All other requests require authentication
+                        .anyRequest().authenticated()
                 )
+                // Add JWT filter before UsernamePasswordAuthenticationFilter
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 // Disable default form login and HTTP basic
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);

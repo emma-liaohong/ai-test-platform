@@ -7,9 +7,10 @@ import router from '@/router'
 export interface UserInfo {
   id: number
   username: string
-  nickname: string
+  realName: string
+  email: string
   avatar: string
-  roles: string[]
+  role: string
 }
 
 export const useUserStore = defineStore('user', () => {
@@ -18,9 +19,14 @@ export const useUserStore = defineStore('user', () => {
 
   async function login(username: string, password: string) {
     const res: any = await loginApi({ username, password })
-    const tokenValue = res.data?.token || res.token
+    const data = res.data || res
+    const tokenValue = data.token
     token.value = tokenValue
     setToken(tokenValue)
+    // Store userInfo from login response
+    if (data.userInfo) {
+      userInfo.value = data.userInfo
+    }
     return res
   }
 

@@ -79,5 +79,5 @@ export function getDocumentList(params?: {
 }
 
 export function getSystemOptions() {
-  return request.get('/systems/options')
+  return request.get('/system/systems/all')
 }

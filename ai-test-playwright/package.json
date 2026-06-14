@@ -1,0 +1,15 @@
+{
+  "name": "ai-test-playwright",
+  "version": "1.0.0",
+  "description": "E2E tests for AI Test Platform using Playwright",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
+    "report": "npx playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "@types/node": "^25.9.3",
+    "typescript": "^6.0.3"
+  }
+}

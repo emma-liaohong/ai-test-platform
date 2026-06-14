@@ -141,5 +141,5 @@ export function deleteRiskAnalysis(id: number) {
 // ===================== System (for dropdowns) =====================
 
 export function getSystemOptions() {
-  return request.get('/systems/options')
+  return request.get('/system/systems/all')
 }

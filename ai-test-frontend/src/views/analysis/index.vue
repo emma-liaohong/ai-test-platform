@@ -492,7 +492,7 @@ async function fetchDocuments() {
   docLoading.value = true
   try {
     const res: any = await getDocumentList({ page: 1, size: 50 })
-    documentOptions.value = res.data?.list || res.list || []
+    documentOptions.value = res.data?.records || res.data?.list || []
   } catch {
     documentOptions.value = mockDocuments as unknown as KbDocument[]
   } finally {
@@ -508,7 +508,7 @@ async function searchDocuments(query: string) {
   docLoading.value = true
   try {
     const res: any = await getDocumentList({ page: 1, size: 20, docType: '' })
-    const allDocs: KbDocument[] = res.data?.list || res.list || []
+    const allDocs: KbDocument[] = res.data?.records || res.data?.list || []
     documentOptions.value = allDocs.filter(
       (d) => d.docName.toLowerCase().includes(query.toLowerCase())
     )

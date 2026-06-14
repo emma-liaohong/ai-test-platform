@@ -359,7 +359,7 @@ async function fetchData() {
     if (queryParams.analysisType) params.analysisType = queryParams.analysisType
 
     const res: any = await getRiskAnalysisList(params)
-    tableData.value = res.data?.list || res.list || []
+    tableData.value = res.data?.records || res.data?.list || []
     pagination.total = res.data?.total || res.total || 0
   } catch {
     // Error handled by interceptor — use mock fallback

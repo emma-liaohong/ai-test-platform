@@ -43,3 +43,8 @@ uploads/
 mysql_data/
 redis_data/
 minio_data/
+
+# Playwright
+playwright-report/
+test-results/
+blob-report/

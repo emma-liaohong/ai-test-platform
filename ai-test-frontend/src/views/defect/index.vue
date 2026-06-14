@@ -599,7 +599,7 @@ async function fetchData() {
     if (queryParams.status) params.status = queryParams.status
 
     const res: any = await getDefectList(params)
-    tableData.value = res.data?.list || res.list || []
+    tableData.value = res.data?.records || res.data?.list || []
     pagination.total = res.data?.total || res.total || 0
   } catch {
     // Error handled by interceptor — use mock fallback

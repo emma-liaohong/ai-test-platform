@@ -46,7 +46,7 @@
       <div class="pagination">
         <el-pagination
           v-model:current-page="pagination.page"
-          v-model:page-size="pagination.pageSize"
+          v-model:page-size="pagination.size"
           :total="pagination.total"
           :page-sizes="[10, 20, 50]"
           layout="total, sizes, prev, pager, next, jumper"
@@ -108,7 +108,7 @@ const formRef = ref<FormInstance>()
 
 const pagination = reactive({
   page: 1,
-  pageSize: 10,
+  size: 10,
   total: 0,
 })
 
@@ -137,11 +137,11 @@ async function fetchData() {
   try {
     const res: any = await getSystemList({
       page: pagination.page,
-      pageSize: pagination.pageSize,
+      size: pagination.size,
       keyword: searchKeyword.value,
     })
-    tableData.value = res.data?.list || res.list || []
-    pagination.total = res.data?.total || res.total || 0
+    tableData.value = res.data?.records || res.data?.list || []
+    pagination.total = res.data?.total || 0
   } catch {
     // Error handled by interceptor
   } finally {

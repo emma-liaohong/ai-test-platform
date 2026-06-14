@@ -144,7 +144,7 @@
               <div class="pagination">
                 <el-pagination
                   v-model:current-page="docQueryParams.page"
-                  v-model:page-size="docQueryParams.pageSize"
+                  v-model:page-size="docQueryParams.size"
                   :total="docPagination.total"
                   :page-sizes="[10, 20, 50, 100]"
                   layout="total, sizes, prev, pager, next, jumper"
@@ -237,7 +237,7 @@
               <div class="pagination" v-if="videoPagination.total > 0">
                 <el-pagination
                   v-model:current-page="videoQueryParams.page"
-                  v-model:page-size="videoQueryParams.pageSize"
+                  v-model:page-size="videoQueryParams.size"
                   :total="videoPagination.total"
                   :page-sizes="[12, 24, 48]"
                   layout="total, sizes, prev, pager, next"
@@ -797,7 +797,7 @@ const activeTab = ref('documents')
 const docLoading = ref(false)
 const docQueryParams = reactive<DocumentQuery>({
   page: 1,
-  pageSize: 20,
+  size: 20,
   keyword: '',
   categoryId: '',
   systemId: '',
@@ -837,7 +837,7 @@ async function fetchDocuments() {
   try {
     const params: Record<string, any> = {
       page: docQueryParams.page,
-      pageSize: docQueryParams.pageSize,
+      size: docQueryParams.size,
     }
     if (docQueryParams.keyword) params.keyword = docQueryParams.keyword
     if (docQueryParams.categoryId !== '' && docQueryParams.categoryId != null) {
@@ -850,7 +850,7 @@ async function fetchDocuments() {
     if (docQueryParams.parseStatus) params.parseStatus = docQueryParams.parseStatus
 
     const res: any = await getDocumentList(params)
-    documentList.value = res.data?.list || res.list || []
+    documentList.value = res.data?.records || res.data?.list || []
     docPagination.total = res.data?.total || res.total || 0
   } catch {
     // Use mock data
@@ -869,7 +869,7 @@ function handleDocSearch() {
 function handleDocReset() {
   Object.assign(docQueryParams, {
     page: 1,
-    pageSize: 20,
+    size: 20,
     keyword: '',
     categoryId: '',
     systemId: '',
@@ -980,7 +980,7 @@ async function handleDeleteDocument(id: number) {
 const videoLoading = ref(false)
 const videoQueryParams = reactive({
   page: 1,
-  pageSize: 12,
+  size: 12,
   videoType: '' as string,
   systemId: undefined as number | undefined,
 })
@@ -1015,13 +1015,13 @@ async function fetchVideos() {
   try {
     const params: Record<string, any> = {
       page: videoQueryParams.page,
-      pageSize: videoQueryParams.pageSize,
+      size: videoQueryParams.size,
     }
     if (videoQueryParams.videoType) params.videoType = videoQueryParams.videoType
     if (videoQueryParams.systemId != null) params.systemId = videoQueryParams.systemId
 
     const res: any = await getVideoList(params)
-    videoList.value = res.data?.list || res.list || []
+    videoList.value = res.data?.records || res.data?.list || []
     videoPagination.total = res.data?.total || res.total || 0
   } catch {
     // Mock data
@@ -1097,7 +1097,7 @@ async function handleAiSearch() {
       query: searchQuery.value,
       categoryId: docQueryParams.categoryId !== '' ? Number(docQueryParams.categoryId) : undefined,
     })
-    searchResults.value = res.data?.list || res.list || []
+    searchResults.value = res.data?.records || res.data?.list || []
     if (searchResults.value.length === 0) {
       // Generate mock results
       searchResults.value = generateMockSearchResults(searchQuery.value)

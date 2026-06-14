@@ -1,0 +1,20 @@
+{
+  "name": "ai-test-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-driven Full-Chain Automation Testing Platform",
+  "scripts": {
+    "prepare": "husky",
+    "test:api": "node run-tests.js",
+    "test:e2e": "cd ai-test-playwright && npx playwright test",
+    "test:e2e:ui": "cd ai-test-playwright && npx playwright test --ui"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emma-liaohong/ai-test-platform.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

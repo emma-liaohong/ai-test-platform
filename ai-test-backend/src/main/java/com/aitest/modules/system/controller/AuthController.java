@@ -78,8 +78,30 @@ public class AuthController {
     @GetMapping("/info")
     @Operation(summary = "Get current user info", description = "Get the authenticated user's information")
     public Result<LoginVO.UserInfo> getUserInfo() {
-        // TODO: Extract user from SecurityContext after JWT filter is implemented
-        // For now, return a placeholder
-        return Result.success();
+        var authentication = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
+
+        if (authentication == null || !(authentication.getPrincipal() instanceof SysUser)) {
+            throw new BusinessException(401, "Not authenticated");
+        }
+
+        SysUser user = (SysUser) authentication.getPrincipal();
+
+        // Refresh user data from DB
+        SysUser freshUser = sysUserService.getByUsername(user.getUsername());
+        if (freshUser == null) {
+            throw new BusinessException(401, "User not found");
+        }
+
+        LoginVO.UserInfo userInfo = LoginVO.UserInfo.builder()
+                .id(freshUser.getId())
+                .username(freshUser.getUsername())
+                .realName(freshUser.getRealName())
+                .email(freshUser.getEmail())
+                .avatar(freshUser.getAvatar())
+                .role(freshUser.getRole())
+                .build();
+
+        return Result.success(userInfo);
     }
 }

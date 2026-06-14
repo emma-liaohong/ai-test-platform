@@ -13,26 +13,32 @@ export interface System {
 
 export interface SystemQuery {
   page?: number
-  pageSize?: number
+  size?: number
   keyword?: string
 }
 
 export function getSystemList(params?: SystemQuery) {
-  return request.get('/systems', { params })
+  // Map frontend params to backend params
+  const backendParams = {
+    current: params?.page || 1,
+    size: params?.size || 10,
+    name: params?.keyword || undefined,
+  };
+  return request.get('/system/systems', { params: backendParams });
 }
 
 export function getSystemById(id: number) {
-  return request.get(`/systems/${id}`)
+  return request.get(`/system/systems/${id}`)
 }
 
 export function createSystem(data: System) {
-  return request.post('/systems', data)
+  return request.post('/system/systems', data)
 }
 
 export function updateSystem(id: number, data: System) {
-  return request.put(`/systems/${id}`, data)
+  return request.put(`/system/systems/${id}`, data)
 }
 
 export function deleteSystem(id: number) {
-  return request.delete(`/systems/${id}`)
+  return request.delete(`/system/systems/${id}`)
 }

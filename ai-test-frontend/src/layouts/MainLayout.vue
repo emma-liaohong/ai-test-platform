@@ -101,7 +101,7 @@
           <el-dropdown trigger="click" @command="handleCommand">
             <div class="user-info">
               <el-avatar :size="32" icon="UserFilled" />
-              <span class="username">{{ userStore.userInfo?.nickname || 'Admin' }}</span>
+              <span class="username">{{ userStore.userInfo?.realName || 'Admin' }}</span>
               <el-icon><ArrowDown /></el-icon>
             </div>
             <template #dropdown>

@@ -69,7 +69,7 @@ export interface KbVideo {
 
 export interface DocumentQuery {
   page?: number
-  pageSize?: number
+  size?: number
   keyword?: string
   categoryId?: number | ''
   systemId?: number | ''
@@ -125,7 +125,7 @@ export function searchKnowledge(params: { query: string; categoryId?: number; sy
 
 // ===================== Video APIs =====================
 
-export function getVideoList(params?: { page?: number; pageSize?: number; systemId?: number; videoType?: string }) {
+export function getVideoList(params?: { page?: number; size?: number; systemId?: number; videoType?: string }) {
   return request.get('/knowledge/videos', { params })
 }
 
@@ -140,5 +140,5 @@ export function deleteVideo(id: number) {
 // ===================== System Options (reuse) =====================
 
 export function getSystemOptions() {
-  return request.get('/systems/options')
+  return request.get('/system/systems/all')
 }

@@ -16,31 +16,31 @@ export interface User {
 
 export interface UserQuery {
   page?: number
-  pageSize?: number
+  size?: number
   keyword?: string
   status?: number
 }
 
 export function getUserList(params?: UserQuery) {
-  return request.get('/users', { params })
+  return request.get('/system/users', { params })
 }
 
 export function getUserById(id: number) {
-  return request.get(`/users/${id}`)
+  return request.get(`/system/users/${id}`)
 }
 
 export function createUser(data: User) {
-  return request.post('/users', data)
+  return request.post('/system/users', data)
 }
 
 export function updateUser(id: number, data: User) {
-  return request.put(`/users/${id}`, data)
+  return request.put(`/system/users/${id}`, data)
 }
 
 export function deleteUser(id: number) {
-  return request.delete(`/users/${id}`)
+  return request.delete(`/system/users/${id}`)
 }
 
 export function resetUserPassword(id: number, password: string) {
-  return request.post(`/users/${id}/reset-password`, { password })
+  return request.post(`/system/users/${id}/reset-password`, { password })
 }

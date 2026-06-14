@@ -195,7 +195,7 @@ export interface CaseExecutionLog {
 /** 套件查询参数 */
 export interface SuiteQuery {
   page?: number
-  pageSize?: number
+  size?: number
   keyword?: string
   systemId?: number | ''
   suiteType?: SuiteType | ''
@@ -205,7 +205,7 @@ export interface SuiteQuery {
 /** 执行查询参数 */
 export interface ExecutionQuery {
   page?: number
-  pageSize?: number
+  size?: number
   keyword?: string
   suiteId?: number | ''
   systemId?: number | ''
@@ -294,5 +294,5 @@ export function getAiAnalysis(executionId: number) {
 // ===================== System (for dropdowns) =====================
 
 export function getSystemOptions() {
-  return request.get('/systems/options')
+  return request.get('/system/systems/all')
 }

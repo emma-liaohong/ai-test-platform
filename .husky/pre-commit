@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+# ═══════════════════════════════════════════════════
+# Pre-commit hook: 提交前快速检查（目标 < 30 秒）
+#
+# 只检查本次提交涉及的文件类型：
+#   - Java 文件变更 → 后端编译
+#   - 前端 TS/Vue 变更 → 类型检查
+#   - Playwright TS 变更 → 编译检查
+#
+# E2E 测试和完整测试套件在 CI 中运行，不在本地执行
+# ═══════════════════════════════════════════════════
+
+set -e
+
+# 获取本次暂存的文件列表
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=d 2>/dev/null || true)
+
+if [ -z "$STAGED_FILES" ]; then
+  exit 0
+fi
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+ERRORS=0
+
+# ─── 1. 后端编译检查 ───
+if echo "$STAGED_FILES" | grep -q "^ai-test-backend/.*\.java$"; then
+  echo -e "${YELLOW}🔧 检测到 Java 文件变更，编译检查...${NC}"
+  if [ -f ai-test-backend/mvnw ]; then
+    (cd ai-test-backend && ./mvnw compile -q -DskipTests) || { echo -e "${RED}❌ 后端编译失败${NC}"; ERRORS=$((ERRORS+1)); }
+    [ $ERRORS -eq 0 ] && echo -e "${GREEN}✅ 后端编译通过${NC}"
+  else
+    echo -e "${YELLOW}⚠️  跳过：未找到 mvnw${NC}"
+  fi
+fi
+
+# ─── 2. 前端类型检查 ───
+if echo "$STAGED_FILES" | grep -q "^ai-test-frontend/src/.*\.\(ts\|vue\)$"; then
+  echo -e "${YELLOW}🔧 检测到前端文件变更，类型检查...${NC}"
+  if [ -f ai-test-frontend/node_modules/.bin/vue-tsc ]; then
+    (cd ai-test-frontend && npx vue-tsc --noEmit) || { echo -e "${RED}❌ 前端类型检查失败${NC}"; ERRORS=$((ERRORS+1)); }
+    [ $ERRORS -eq 0 ] && echo -e "${GREEN}✅ 前端类型检查通过${NC}"
+  else
+    echo -e "${YELLOW}⚠️  跳过：运行 cd ai-test-frontend && npm install${NC}"
+  fi
+fi
+
+# ─── 3. Playwright 编译检查 ───
+if echo "$STAGED_FILES" | grep -q "^ai-test-playwright/.*\.ts$"; then
+  echo -e "${YELLOW}🔧 检测到 Playwright 文件变更，编译检查...${NC}"
+  if [ -f ai-test-playwright/node_modules/.bin/tsc ]; then
+    (cd ai-test-playwright && npx tsc --noEmit) || { echo -e "${RED}❌ Playwright 编译失败${NC}"; ERRORS=$((ERRORS+1)); }
+    [ $ERRORS -eq 0 ] && echo -e "${GREEN}✅ Playwright 编译通过${NC}"
+  else
+    echo -e "${YELLOW}⚠️  跳过：运行 cd ai-test-playwright && npm install${NC}"
+  fi
+fi
+
+# ─── 结果 ───
+echo ""
+if [ $ERRORS -gt 0 ]; then
+  echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo -e "${RED}❌ Pre-commit 检查失败（$ERRORS 个错误）${NC}"
+  echo -e "${RED}   请修复后重新提交${NC}"
+  echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo -e "${YELLOW}💡 E2E 测试会在 push 后由 CI 自动运行${NC}"
+  exit 1
+fi
+
+echo -e "${GREEN}✅ Pre-commit 检查全部通过${NC}"
+
+# ─── 4. 自动更新 CLAUDE.md ───
+# 检测架构级变更：Controller、路由、依赖、目录结构
+ARCH_CHANGED=false
+if echo "$STAGED_FILES" | grep -qE "(Controller\.java|router/index\.ts|pom\.xml|package\.json|\.github/)"; then
+  ARCH_CHANGED=true
+fi
+
+if [ "$ARCH_CHANGED" = true ] && [ -f scripts/update-docs.sh ]; then
+  echo -e "${YELLOW}📝 检测到架构变更，自动更新 CLAUDE.md...${NC}"
+
+  # 记录更新前的 hash
+  old_hash=""
+  [ -f CLAUDE.md ] && old_hash=$(md5sum CLAUDE.md 2>/dev/null | cut -d' ' -f1 || echo "")
+
+  # 运行更新脚本（静默模式）
+  bash scripts/update-docs.sh --quiet 2>/dev/null || true
+
+  # 检查 CLAUDE.md 是否有变化
+  new_hash=""
+  [ -f CLAUDE.md ] && new_hash=$(md5sum CLAUDE.md 2>/dev/null | cut -d' ' -f1 || echo "")
+
+  if [ "$old_hash" != "$new_hash" ]; then
+    git add CLAUDE.md 2>/dev/null || true
+    echo -e "${GREEN}✅ CLAUDE.md 已自动更新并加入暂存区${NC}"
+  else
+    echo -e "${GREEN}✅ CLAUDE.md 无需更新${NC}"
+  fi
+fi

@@ -42,7 +42,7 @@ export interface RecordSession {
 /** 查询参数 */
 export interface RecordSessionQuery {
   page?: number
-  pageSize?: number
+  size?: number
   keyword?: string
   systemId?: number | ''
   status?: RecordStatus | ''
@@ -79,5 +79,5 @@ export function generateCase(id: number) {
 }
 
 export function getSystemOptions() {
-  return request.get('/systems/options')
+  return request.get('/system/systems/all')
 }

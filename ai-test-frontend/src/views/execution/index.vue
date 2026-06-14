@@ -142,7 +142,7 @@
       <div class="pagination">
         <el-pagination
           v-model:current-page="queryParams.page"
-          v-model:page-size="queryParams.pageSize"
+          v-model:page-size="queryParams.size"
           :total="pagination.total"
           :page-sizes="[10, 20, 50, 100]"
           layout="total, sizes, prev, pager, next, jumper"
@@ -186,7 +186,7 @@ const statusTagMap: Record<string, { type: 'info' | 'success' | 'warning' | 'dan
 
 const queryParams = reactive<ExecutionQuery>({
   page: 1,
-  pageSize: 20,
+  size: 20,
   keyword: '',
   systemId: '',
   status: '',
@@ -216,7 +216,7 @@ async function fetchData() {
   try {
     const params: Record<string, any> = {
       page: queryParams.page,
-      pageSize: queryParams.pageSize,
+      size: queryParams.size,
     }
     if (queryParams.keyword) params.keyword = queryParams.keyword
     if (queryParams.systemId) params.systemId = queryParams.systemId
@@ -224,7 +224,7 @@ async function fetchData() {
     if (queryParams.triggerType) params.triggerType = queryParams.triggerType
 
     const res: any = await getExecutionList(params)
-    tableData.value = res.data?.list || res.list || []
+    tableData.value = res.data?.records || res.data?.list || []
     pagination.total = res.data?.total || res.total || 0
   } catch {
     // Error handled by interceptor

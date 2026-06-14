@@ -113,7 +113,7 @@ export interface TestCase {
 /** 查询参数 */
 export interface CaseQuery {
   page?: number
-  pageSize?: number
+  size?: number
   keyword?: string
   caseType?: CaseType | ''
   systemId?: number | ''
@@ -154,7 +154,7 @@ export function executeCase(id: number) {
 // ===================== System (for dropdowns) =====================
 
 export function getSystemOptions() {
-  return request.get('/systems/options')
+  return request.get('/system/systems/all')
 }
 
 // ===================== Data Table APIs =====================

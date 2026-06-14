@@ -20,6 +20,7 @@ spring:
       mode: always
       schema-locations: classpath:db/h2-init.sql
       data-locations: classpath:db/h2-data.sql
+      encoding: UTF-8
 
 mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml

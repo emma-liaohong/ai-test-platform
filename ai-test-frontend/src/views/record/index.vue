@@ -216,7 +216,7 @@
       <div class="pagination">
         <el-pagination
           v-model:current-page="queryParams.page"
-          v-model:page-size="queryParams.pageSize"
+          v-model:page-size="queryParams.size"
           :total="pagination.total"
           :page-sizes="[10, 20, 50, 100]"
           layout="total, sizes, prev, pager, next, jumper"
@@ -332,7 +332,7 @@ const statusTagMap: Record<string, { type: 'danger' | 'warning' | 'success'; lab
 
 const queryParams = reactive<RecordSessionQuery>({
   page: 1,
-  pageSize: 10,
+  size: 10,
   keyword: '',
   systemId: '',
   status: '',
@@ -421,14 +421,14 @@ async function fetchData() {
   try {
     const params: Record<string, any> = {
       page: queryParams.page,
-      pageSize: queryParams.pageSize,
+      size: queryParams.size,
     }
     if (queryParams.keyword) params.keyword = queryParams.keyword
     if (queryParams.systemId) params.systemId = queryParams.systemId
     if (queryParams.status) params.status = queryParams.status
 
     const res: any = await getSessionList(params)
-    tableData.value = res.data?.list || res.list || []
+    tableData.value = res.data?.records || res.data?.list || []
     pagination.total = res.data?.total || res.total || 0
   } catch {
     // Fallback to mock data with client-side filtering
@@ -448,8 +448,8 @@ async function fetchData() {
       filtered = filtered.filter((s) => s.status === queryParams.status)
     }
     pagination.total = filtered.length
-    const start = (queryParams.page! - 1) * queryParams.pageSize!
-    tableData.value = filtered.slice(start, start + queryParams.pageSize!)
+    const start = (queryParams.page! - 1) * queryParams.size!
+    tableData.value = filtered.slice(start, start + queryParams.size!)
   } finally {
     loading.value = false
   }

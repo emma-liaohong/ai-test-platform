@@ -2,7 +2,7 @@
   <div class="dashboard-container">
     <!-- Welcome -->
     <div class="welcome-section">
-      <h2>👋 欢迎回来，{{ userStore.userInfo?.nickname || 'Admin' }}</h2>
+      <h2>👋 欢迎回来，{{ userStore.userInfo?.realName || 'Admin' }}</h2>
       <p class="welcome-desc">今天是 {{ currentDate }}，祝你工作愉快！</p>
     </div>
 

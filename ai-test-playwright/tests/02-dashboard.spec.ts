@@ -69,4 +69,15 @@ test.describe('工作台', () => {
     await expect(page).toHaveURL(/\/systems/);
     await expect(page.locator('.el-table')).toBeVisible({ timeout: 10000 });
   });
+
+  test('ECharts 图表渲染正常', async ({ page }) => {
+    const dashboard = new DashboardPage(page);
+    await dashboard.goto();
+    // Wait for charts to render
+    await page.waitForTimeout(3000);
+    // Should have 2 ECharts canvas elements (trend + pie)
+    const canvases = page.locator('canvas');
+    const count = await canvases.count();
+    expect(count).toBeGreaterThanOrEqual(2);
+  });
 });

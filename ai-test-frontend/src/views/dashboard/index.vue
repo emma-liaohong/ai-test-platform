@@ -28,24 +28,25 @@
       <el-col :xs="24" :lg="16">
         <el-card shadow="hover">
           <template #header>
-            <span>执行趋势</span>
+            <span>执行趋势（近7天）</span>
           </template>
-          <div class="chart-placeholder">
-            <el-icon :size="48"><TrendCharts /></el-icon>
-            <p>图表区域 - 待集成 ECharts</p>
-          </div>
+          <v-chart :option="trendChartOption" autoresize style="height: 280px" />
         </el-card>
       </el-col>
 
       <el-col :xs="24" :lg="8">
         <el-card shadow="hover">
           <template #header>
-            <span>用例分布</span>
+            <div class="card-header">
+              <span>用例分布</span>
+              <el-radio-group v-model="pieDimension" size="small">
+                <el-radio-button label="type">类型</el-radio-button>
+                <el-radio-button label="priority">优先级</el-radio-button>
+                <el-radio-button label="system">系统</el-radio-button>
+              </el-radio-group>
+            </div>
           </template>
-          <div class="chart-placeholder">
-            <el-icon :size="48"><PieChart /></el-icon>
-            <p>图表区域 - 待集成 ECharts</p>
-          </div>
+          <v-chart :option="pieChartOption" autoresize style="height: 280px" />
         </el-card>
       </el-col>
 
@@ -75,10 +76,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/store/user'
 import { getDashboardStats, type DashboardStats } from '@/api/dashboard'
+import VChart from 'vue-echarts'
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { LineChart, PieChart } from 'echarts/charts'
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GridComponent,
+} from 'echarts/components'
+
+use([
+  CanvasRenderer,
+  LineChart,
+  PieChart,
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GridComponent,
+])
 
 const userStore = useUserStore()
 
@@ -100,12 +121,82 @@ const statCards = computed(() => [
   { title: 'AI 对话', value: stats.value.conversationCount.toLocaleString(), icon: 'ChatDotRound', color: '#909399' },
 ])
 
+// --- Chart data ---
+const trendData = ref<{ dates: string[]; values: number[] }>({ dates: [], values: [] })
+const distributionData = ref<{
+  byType: { name: string; value: number }[]
+  byPriority: { name: string; value: number }[]
+  bySystem: { name: string; value: number }[]
+}>({ byType: [], byPriority: [], bySystem: [] })
+
+const pieDimension = ref<'type' | 'priority' | 'system'>('type')
+
+const trendChartOption = computed(() => ({
+  tooltip: { trigger: 'axis' },
+  grid: { left: 40, right: 20, top: 20, bottom: 30 },
+  xAxis: {
+    type: 'category',
+    data: trendData.value.dates,
+    axisLabel: { fontSize: 12 },
+  },
+  yAxis: {
+    type: 'value',
+    minInterval: 1,
+    axisLabel: { fontSize: 12 },
+  },
+  series: [
+    {
+      name: '新增用例',
+      type: 'line',
+      data: trendData.value.values,
+      smooth: true,
+      areaStyle: { color: 'rgba(64,158,255,0.15)' },
+      lineStyle: { color: '#409EFF', width: 2 },
+      itemStyle: { color: '#409EFF' },
+    },
+  ],
+}))
+
+const pieColors = ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C', '#909399', '#b37feb', '#36cfc9', '#ff85c0']
+
+const pieChartOption = computed(() => {
+  const dimKey = pieDimension.value === 'type' ? 'byType' : pieDimension.value === 'priority' ? 'byPriority' : 'bySystem'
+  const data = distributionData.value[dimKey] || []
+  return {
+    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    legend: { bottom: 0, left: 'center', textStyle: { fontSize: 12 } },
+    color: pieColors,
+    series: [
+      {
+        type: 'pie',
+        radius: ['40%', '65%'],
+        center: ['50%', '45%'],
+        avoidLabelOverlap: true,
+        itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+        label: { show: true, formatter: '{b}\n{c}' },
+        data: data.length > 0 ? data : [{ name: '暂无数据', value: 0 }],
+      },
+    ],
+  }
+})
+
 onMounted(async () => {
   try {
     const res = await getDashboardStats()
     stats.value = res.data || res
   } catch {
     // stats remain at 0
+  }
+  // Fetch chart data
+  try {
+    const [trendRes, distRes]: any[] = await Promise.all([
+      (await import('@/utils/request')).default.get('/dashboard/chart/execution-trend'),
+      (await import('@/utils/request')).default.get('/dashboard/chart/case-distribution'),
+    ])
+    trendData.value = trendRes.data || trendRes
+    distributionData.value = distRes.data || distRes
+  } catch {
+    // chart data not critical
   }
 })
 
@@ -200,20 +291,6 @@ const recentActivities = ref([
 }
 
 .dashboard-grid {
-  .chart-placeholder {
-    height: 280px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: var(--el-text-color-placeholder);
-    gap: 12px;
-
-    p {
-      font-size: 14px;
-    }
-  }
-
   .card-header {
     display: flex;
     justify-content: space-between;

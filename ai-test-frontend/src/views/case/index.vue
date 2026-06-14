@@ -155,26 +155,28 @@
           </template>
         </el-table-column>
         <el-table-column prop="createdAt" label="创建时间" width="170" />
-        <el-table-column label="操作" width="200" fixed="right" @click.stop>
+        <el-table-column label="操作" width="150" fixed="right" align="center" @click.stop>
           <template #default="{ row }">
-            <el-button text type="success" size="small" @click.stop="handleExecute(row)">
-              <el-icon><VideoPlay /></el-icon>执行
-            </el-button>
-            <el-button text type="primary" size="small" @click.stop="handleEdit(row)">
-              <el-icon><Edit /></el-icon>编辑
-            </el-button>
-            <el-popconfirm
-              title="确定删除该测试用例吗？删除后不可恢复。"
-              confirm-button-text="删除"
-              cancel-button-text="取消"
-              @confirm="handleDelete(row.id)"
-            >
-              <template #reference>
-                <el-button text type="danger" size="small" @click.stop>
-                  <el-icon><Delete /></el-icon>删除
-                </el-button>
-              </template>
-            </el-popconfirm>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 2px;">
+              <el-tooltip content="执行" placement="top" :show-after="300">
+                <el-button text type="success" size="small" :icon="VideoPlay" @click.stop="handleExecute(row)" />
+              </el-tooltip>
+              <el-tooltip content="编辑" placement="top" :show-after="300">
+                <el-button text type="primary" size="small" :icon="Edit" @click.stop="handleEdit(row)" />
+              </el-tooltip>
+              <el-popconfirm
+                title="确定删除该测试用例吗？删除后不可恢复。"
+                confirm-button-text="删除"
+                cancel-button-text="取消"
+                @confirm="handleDelete(row.id)"
+              >
+                <template #reference>
+                  <el-tooltip content="删除" placement="top" :show-after="300">
+                    <el-button text type="danger" size="small" :icon="Delete" @click.stop />
+                  </el-tooltip>
+                </template>
+              </el-popconfirm>
+            </div>
           </template>
         </el-table-column>
       </el-table>

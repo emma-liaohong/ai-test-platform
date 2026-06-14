@@ -256,6 +256,8 @@ ai-test-platform/
 | Method | Path |
 |--------|------|
 | get | `/api/dashboard/stats` |
+| get | `/api/dashboard/chart/case-distribution` |
+| get | `/api/dashboard/chart/execution-trend` |
 
 **SysConfigController** (`/api/config`)
 
@@ -333,5 +335,5 @@ ai-test-platform/
 | E2E | Playwright | 1.48.0 |
 
 ---
-_自动更新于 2026-06-14 20:07_
+_自动更新于 2026-06-14 20:29_
 <!-- AUTO:END -->

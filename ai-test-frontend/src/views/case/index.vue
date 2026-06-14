@@ -329,8 +329,14 @@ async function handleExecute(row: TestCase) {
       cancelButtonText: '取消',
       type: 'info',
     })
-    await executeCase(row.id)
-    ElMessage.success('用例已提交执行')
+    const res: any = await executeCase(row.id)
+    const executionId = res.data?.id || res.id
+    if (executionId) {
+      ElMessage.success('用例执行完成')
+      router.push(`/executions/${executionId}`)
+    } else {
+      ElMessage.success('用例已提交执行')
+    }
   } catch {
     // cancelled or error
   }

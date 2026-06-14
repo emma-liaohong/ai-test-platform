@@ -75,7 +75,7 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
         testCase.setApiHeaders(dto.getApiHeaders());
         testCase.setPreconditions(dto.getPreconditions());
         testCase.setExpectedResult(dto.getExpectedResult());
-        testCase.setTags(dto.getTags());
+        testCase.setTags(resolveTags(dto.getTags(), dto.getCaseName()));
         testCase.setStatus(dto.getStatus() != null ? dto.getStatus() : "draft");
         testCase.setIsDataDriven(dto.getIsDataDriven());
         testCase.setDataTableId(dto.getDataTableId());
@@ -277,5 +277,42 @@ public class TestCaseServiceImpl extends ServiceImpl<TestCaseMapper, TestCase> i
         testCaseStepMapper.delete(
                 new LambdaQueryWrapper<TestCaseStep>()
                         .eq(TestCaseStep::getCaseId, caseId));
+    }
+
+    /**
+     * Resolve tags: use provided tags, or auto-extract from case name.
+     * Parses patterns like "模块 - 功能点" or "模块 / 子功能" into comma-separated tags.
+     */
+    private String resolveTags(String tags, String caseName) {
+        if (StringUtils.hasText(tags)) {
+            return tags;
+        }
+        if (!StringUtils.hasText(caseName)) {
+            return null;
+        }
+
+        // Split by common delimiters
+        String[] parts = caseName.split("[\\s]*[-—/·、，,][\\s]*");
+        List<String> extracted = new java.util.ArrayList<>();
+        for (String part : parts) {
+            String trimmed = part.trim();
+            // Keep meaningful segments (2+ chars, skip generic filler words)
+            if (trimmed.length() >= 2
+                    && !trimmed.matches("^(测试|用例|验证|检查|确认|场景|功能)$")) {
+                extracted.add(trimmed);
+            }
+        }
+
+        if (extracted.isEmpty()) {
+            // Fallback: use the case type as tag
+            return null;
+        }
+
+        // Limit to 5 tags max
+        if (extracted.size() > 5) {
+            extracted = extracted.subList(0, 5);
+        }
+
+        return String.join(",", extracted);
     }
 }

@@ -128,11 +128,23 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/store/app'
 import { useUserStore } from '@/store/user'
+import { onMounted } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
 const userStore = useUserStore()
+
+// Ensure userInfo is loaded (fallback if login response didn't include it)
+onMounted(async () => {
+  if (!userStore.userInfo) {
+    try {
+      await userStore.getInfo()
+    } catch {
+      // ignore
+    }
+  }
+})
 
 const activeMenu = computed(() => route.path)
 const currentRoute = computed(() => route)

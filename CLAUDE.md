@@ -82,9 +82,9 @@ ai-test-platform/
 
 | 指标 | 数量 |
 |------|------|
-| Java 源文件 | 147 |
+| Java 源文件 | 148 |
 | Vue 组件 | 24 |
-| API Controller | 18 |
+| API Controller | 19 |
 | E2E 测试用例文件 | 15 |
 | Page Object | 15 |
 
@@ -251,6 +251,12 @@ ai-test-platform/
 | post | `/api/auth/logout` |
 | get | `/api/auth/info` |
 
+**DashboardController** (`/api/dashboard`)
+
+| Method | Path |
+|--------|------|
+| get | `/api/dashboard/stats` |
+
 **SysConfigController** (`/api/config`)
 
 | Method | Path |
@@ -327,5 +333,5 @@ ai-test-platform/
 | E2E | Playwright | 1.48.0 |
 
 ---
-_自动更新于 2026-06-14 18:05_
+_自动更新于 2026-06-14 20:07_
 <!-- AUTO:END -->

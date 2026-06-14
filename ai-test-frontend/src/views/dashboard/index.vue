@@ -75,21 +75,39 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/store/user'
+import { getDashboardStats, type DashboardStats } from '@/api/dashboard'
 
 const userStore = useUserStore()
 
 const currentDate = computed(() => dayjs().format('YYYY年MM月DD日 dddd'))
 
-const statCards = ref([
-  { title: '测试用例', value: '1,286', icon: 'Document', color: '#409EFF' },
-  { title: '用例套件', value: '48', icon: 'FolderOpened', color: '#67C23A' },
-  { title: '缺陷总数', value: '156', icon: 'WarningFilled', color: '#E6A23C' },
-  { title: 'AI 技能', value: '12', icon: 'MagicStick', color: '#F56C6C' },
-  { title: 'AI 对话', value: '3,842', icon: 'ChatDotRound', color: '#909399' },
+const stats = ref<DashboardStats>({
+  caseCount: 0,
+  suiteCount: 0,
+  defectCount: 0,
+  skillCount: 0,
+  conversationCount: 0,
+})
+
+const statCards = computed(() => [
+  { title: '测试用例', value: stats.value.caseCount.toLocaleString(), icon: 'Document', color: '#409EFF' },
+  { title: '用例套件', value: stats.value.suiteCount.toLocaleString(), icon: 'FolderOpened', color: '#67C23A' },
+  { title: '缺陷总数', value: stats.value.defectCount.toLocaleString(), icon: 'WarningFilled', color: '#E6A23C' },
+  { title: 'AI 技能', value: stats.value.skillCount.toLocaleString(), icon: 'MagicStick', color: '#F56C6C' },
+  { title: 'AI 对话', value: stats.value.conversationCount.toLocaleString(), icon: 'ChatDotRound', color: '#909399' },
 ])
+
+onMounted(async () => {
+  try {
+    const res = await getDashboardStats()
+    stats.value = res.data || res
+  } catch {
+    // stats remain at 0
+  }
+})
 
 const recentActivities = ref([
   {
